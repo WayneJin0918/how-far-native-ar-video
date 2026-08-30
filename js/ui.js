@@ -1,0 +1,97 @@
+(function () {
+  function ready(fn) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fn);
+    } else {
+      fn();
+    }
+  }
+  ready(function () {
+    setupCites();
+    setupSee();
+    setupStack();
+  });
+})();
+
+function setupCites() {
+  const tip = document.createElement("div");
+  tip.className = "cite-tip";
+  document.body.appendChild(tip);
+
+  function hide() {
+    tip.classList.remove("on");
+  }
+
+  document.querySelectorAll("a.cite").forEach(function (a) {
+    const href = a.getAttribute("href") || "";
+    const id = href.startsWith("#ref-")
+      ? href
+      : a.textContent.trim()
+        ? "#ref-" + a.textContent.trim()
+        : "";
+    const li = id ? document.querySelector(id) : null;
+    const text = li ? li.textContent.replace(/\s+/g, " ").trim() : "";
+
+    a.addEventListener("mouseenter", function (ev) {
+      if (!text) return;
+      tip.textContent = text;
+      tip.classList.add("on");
+      const r = ev.target.getBoundingClientRect();
+      const left = Math.min(r.left, window.innerWidth - 360);
+      tip.style.left = Math.max(12, left) + "px";
+      tip.style.top = r.bottom + 8 + "px";
+    });
+    a.addEventListener("mouseleave", hide);
+
+    a.addEventListener("click", function (ev) {
+      if (!li) return;
+      ev.preventDefault();
+      document.querySelectorAll(".refs li.flash").forEach(function (n) {
+        n.classList.remove("flash");
+      });
+      li.classList.add("flash");
+      li.scrollIntoView({ behavior: "smooth", block: "center" });
+      history.replaceState(null, "", id);
+      setTimeout(function () {
+        li.classList.remove("flash");
+      }, 1600);
+    });
+  });
+}
+
+function setupSee() {
+  document.querySelectorAll(".fig-see").forEach(function (fig) {
+    const buttons = fig.querySelectorAll(".see-toggle button");
+    const note = fig.querySelector(".see-note");
+    const notes = {
+      bi: fig.dataset.noteBi || "",
+      ar: fig.dataset.noteAr || "",
+    };
+    function setMode(mode) {
+      fig.dataset.mode = mode;
+      buttons.forEach(function (b) {
+        b.classList.toggle("on", b.dataset.mode === mode);
+      });
+      if (note) note.textContent = notes[mode];
+    }
+    buttons.forEach(function (b) {
+      b.addEventListener("click", function () {
+        setMode(b.dataset.mode);
+      });
+    });
+    setMode(fig.dataset.mode || "bi");
+  });
+}
+
+function setupStack() {
+  document.querySelectorAll(".fig-stack").forEach(function (fig) {
+    const items = fig.querySelectorAll(".stack li");
+    items.forEach(function (li) {
+      li.addEventListener("click", function () {
+        items.forEach(function (n) {
+          n.classList.toggle("on", n === li);
+        });
+      });
+    });
+  });
+}
