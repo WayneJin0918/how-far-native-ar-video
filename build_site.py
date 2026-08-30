@@ -118,7 +118,7 @@ def fig_loops(zh: bool) -> str:
         x = x + Δσ · v_θ(x, σ | B_<i, x)
     cache.write(x)"""
         right = """for t in 1..T:
-    v_t = f_θ(v_<t, c_≤t)   # one forward
+    v_t = f_θ(v_<t, c_≤t)
     cache.write(v_t)"""
     else:
         left_h, right_h = "Current stack", "Native"
@@ -128,7 +128,7 @@ def fig_loops(zh: bool) -> str:
         x = x + Δσ · v_θ(x, σ | B_<i, x)
     cache.write(x)"""
         right = """for t in 1..T:
-    v_t = f_θ(v_<t, c_≤t)   # one forward
+    v_t = f_θ(v_<t, c_≤t)
     cache.write(v_t)"""
     return f"""<figure class="fig fig-code">
   <div class="code-cols">
@@ -354,7 +354,7 @@ def page_html(cfg: dict, body: str) -> str:
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blog.css">
+  <link rel="stylesheet" href="css/blog.css?v=8">
 </head>
 <body>
   <div class="shell">
