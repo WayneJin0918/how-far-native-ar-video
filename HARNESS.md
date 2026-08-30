@@ -34,7 +34,7 @@ TML is a **style** reference: calm we-voice, claim then why, one analogy at most
 
 1. **Read aloud once** in the language you edited. Mark any sentence you would not say to a colleague.
 2. **Logic pass.** Every 所以 / 于是 / so / therefore must follow from the previous sentence. If the dash or colon hides two claims, split them.
-3. **Leftover-AI pass.** Search for: 只有…才, 不是 A 而是 B, 因子, 借口, 回路, 门口, 本文, *collapses to*, *what to learn is not*, *misses both ends*, *the intuition is not hard*.
+3. **Leftover-AI pass.** Search for: 只有…才, 不是 A 而是 B, 因子, 借口, 回路, 门口, 本文, 第一组, 第二组, 实验里, *first experiment*, *second experiment*, *collapses to*, *what to learn is not*, *misses both ends*, *the intuition is not hard*.
 4. **Align, do not translate.** After Chinese changes, fix the matching English claim — same thought, not the same syntax.
 5. **Rebuild.** `python3 build_site.py` from the blog root. Check that KaTeX still has \(v_{>t}\) and \(w_{<i}\).
 6. Stop when a second read-aloud finds nothing you would rewrite. If you still want to “polish tone”, you are done — do not take another stylistic lap.
