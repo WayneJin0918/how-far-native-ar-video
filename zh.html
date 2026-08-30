@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>我们离原生自回归视频模型还有多远</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="css/blog.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="index.html">笔记</a>
+    <nav class="lang">
+      <a href="index.html" class="">English</a>
+      <a href="zh.html" class="is-on">中文</a>
+    </nav>
+  </header>
+  <div class="layout">
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <a href="#图像里没有必须遵守的时间-视频多出来的是-t">图像里没有必须遵守的时间；视频多出来的是 \(t\)</a>
+<a href="#训练看见了未来-一次前向也写不出一个因子">训练看见了未来，一次前向也写不出一个因子</a>
+<a href="#补充实验">补充实验</a>
+<a href="#对原生设计意味着什么">对原生设计意味着什么</a>
+<a href="#references">参考文献</a>
+    </nav>
+    <article>
+      <p class="date">2026年8月31日</p>
+      <h1>我们离原生自回归视频模型还有多远</h1>
+      
+<div class="figure" aria-hidden="true">
+  <div class="hero">
+    <div class="tok-col">
+      <span class="tok-up bad">推理时加 mask</span>
+      <span class="stem"></span>
+      <span class="tok">预训练</span>
+    </div>
+    <div class="tok-col">
+      <span class="tok">乘积</span>
+      <span class="stem"></span>
+      <span class="tok-down ok">p(v<sub>t</sub> | v<sub>&lt;t</sub>)</span>
+    </div>
+    <div class="tok-col">
+      <span class="tok-up warn">块内 K 步 ODE</span>
+      <span class="stem"></span>
+      <span class="tok">一个因子</span>
+    </div>
+    <div class="tok-col">
+      <span class="tok">一次前向</span>
+      <span class="stem"></span>
+      <span class="tok-down ok">不是一段剩余积分</span>
+    </div>
+  </div>
+  <p class="figure-caption">原生自回归是预训练就写下的乘积。因果 mask，以及块内更短的微分方程，是现在常见的替代。</p>
+</div>
+
+      <p>语言模型里，自回归的意思很清楚。预训练拟合的是</p>
+<p class="math-block">
+\[
+p(w_{1:n})=\prod_i p(w_i\mid w_{<i}),
+\]
+</p>
+<p>每一个因子一次前向。训练和测试看见的都是已经写出的词。没有人会先训一个双向 BERT <a class="cite" id="cite-6" href="#ref-6">6</a>，再蒸馏出一个「看起来像 GPT」的学生，然后把后者叫做原生自回归。推理时加上因果 mask，也不够。</p>
+<p>视频上的对应写法是：对 \(V=(v_1,\ldots,v_T)\)，</p>
+<p class="math-block">
+\[
+p(V\mid c)=\prod_t p(v_t\mid v_{<t},c_{\le t}).
+\]
+</p>
+<p>\(c_t\) 是已经发生的条件——文本、第一帧、相机位姿、按键——不是偷看尚未发生的 \(v_{t+12}\) 的许可。我们把预训练就拟合这个乘积、并且一次前向写出其中一个因子的模型，叫做原生自回归。Echo-WM-Flash <a class="cite" href="https://arxiv.org/abs/2608.23189">1</a> 是我们按现在通行的扩散自回归训出来的一条，后面用来看现行做法离这个定义有多远。</p>
+<h2 id="图像里没有必须遵守的时间-视频多出来的是-t">图像里没有必须遵守的时间；视频多出来的是 \(t\)</h2>
+
+<div class="pair">
+  <div class="card bad">
+    <div class="tag">短片段</div>
+    <h3>双向 teacher</h3>
+    <p class="eq">\(q_{\mathrm{bi}}(v_t \mid V_{\setminus t}, c)\)</p>
+    <p>未来帧就在同一条样本里，用上它们画质更好。它赢的测试，是一次看完的几秒钟。</p>
+  </div>
+  <div class="card ok">
+    <div class="tag">流</div>
+    <h3>流式测试要求的条件</h3>
+    <p class="eq">\(q_{\mathrm{AR}}(v_t \mid v_{&lt;t}, c_{\le t})\)</p>
+    <p>后面的帧尚未发生。现场到达的 \(c_t\) 不是偷看 \(v_{t+12}\) 的许可。看见的变量不同，学到的函数就不同。</p>
+  </div>
+</div>
+
+<p>一张图没有必须遵守的时间。左右像素同时在场。PixelRNN <a class="cite" id="cite-4" href="#ref-4">4</a> 把似然写成光栅顺序 \(p(x)=\prod_{h,w}p(x_{hw}\mid x_{<hw})\)，只为了让联合分布有一个顺序。这个顺序是编码约定。DiT <a class="cite" id="cite-12" href="#ref-12">12</a> 把它拿掉，在 \((h,w)\) 上双向更接近一张照片。一帧之内空间保持双向，并不违反时间上的约束。</p>
+<p>视频多出 \(t\)。Video Pixel Networks <a class="cite" id="cite-5" href="#ref-5">5</a> 在像素级就已经把 \(t\) 当成序列，而不是把时长 \(T\) 拉成更长的高。生成 \(v_t\) 时，\(v_{t+1}\) 还不存在——不是「还没画上」，是尚未发生。所以同一个似然里，两种顺序的地位不同：</p>
+<p class="math-block">
+\[
+p(V)=\prod_t p\bigl(v_t\mid v_{<t}\bigr),\qquad
+p(v_t\mid v_{<t})\;\text{在 }(h,w)\text{ 上可以双向。}
+\]
+</p>
+<p>左边的乘积来自时间：后面的帧在生成这一帧时还不存在。右边帧内的双向是表示上的选择。把 \(T\) 当成更长的 \(H\)，等于把「尚未发生」当成「画面另一侧还没画完」。短短几秒的片段上，这个差别几乎看不出来：未来帧就在同一条训练样本里，用上它们画质更好。Sora <a class="cite" id="cite-14" href="#ref-14">14</a>、Wan <a class="cite" id="cite-16" href="#ref-16">16</a>、LTX <a class="cite" id="cite-15" href="#ref-15">15</a> 赢的是这个局部。它们拟合的是整段短片的联合分布，因而每个时刻的条件是</p>
+<p class="math-block">
+\[
+q_{\mathrm{bi}}(v_t\mid V_{\setminus t},c).
+\]
+</p>
+<p>测试一旦变成流——接着往下写、条件 \(c_t\) 现场到达、生成长度超过训练时见过的窗——需要的却是</p>
+<p class="math-block">
+\[
+q_{\mathrm{AR}}(v_t\mid v_{<t},c_{\le t})=p_{\mathrm{data}}(v_t\mid v_{<t},c_{\le t}).
+\]
+</p>
+<p>训练时能看见的变量不同，学到的函数就不同。把 \(c_t\) 换成文本、图像或位姿，只改右边多出来的条件，并不会把左边的 \(V_{\setminus t}\) 变成 \(v_{<t}\)。世界模型 <a class="cite" id="cite-22" href="#ref-22">22</a>–<a class="cite" id="cite-25" href="#ref-25">25</a> 把这个错位暴露得很早，因为人还在回路里；更长的视频和低延迟续写，暴露的是同一件事。</p>
+<p>接着走了一条本可以不走的路。VideoGPT <a class="cite" id="cite-7" href="#ref-7">7</a>、TATS <a class="cite" id="cite-9" href="#ref-9">9</a> 已经在离散符号上写过 \(\prod_t p(v_t\mid v_{<t})\)。画质输给 MaskGIT <a class="cite" id="cite-8" href="#ref-8">8</a>、MAGVIT <a class="cite" id="cite-11" href="#ref-11">11</a>、Phenaki <a class="cite" id="cite-10" href="#ref-10">10</a>，再输给 DiT 规模、整段短片上训的双向模型。图更好看了，时间上的分解被丢掉。产品变成流之后，领域没有回到「时间上只看过去」的预训练，而是问：怎样把已经训好的 \(q_{\mathrm{bi}}\) 改造成测试时看起来像 \(q_{\mathrm{AR}}\)。后面的流水线是在回答这个问题。</p>
+<h2 id="训练看见了未来-一次前向也写不出一个因子">训练看见了未来，一次前向也写不出一个因子</h2>
+
+<table class="compare">
+  <thead><tr><th></th><th>现行扩散自回归</th><th>原生</th></tr></thead>
+  <tbody>
+    <tr><td>训练条件</td><td>\(q_{\mathrm{bi}}\)</td><td>\(p(v_t \mid v_{&lt;t}, c_{\le t})\)</td></tr>
+    <tr><td>一个因子</td><td>\(K\) 步向量场</td><td>一次前向</td></tr>
+    <tr><td>可见的过去 \(\mathcal{H}_i\)</td><td>测试时搜索</td><td>\(\theta\) 里的结构</td></tr>
+    <tr><td>后面各阶段在补什么</td><td>mask、\(K\)、窗口、重置</td><td>没有对象可补</td></tr>
+  </tbody>
+</table>
+
+<div class="pipeline">
+  <div class="step"><b>预训练</b><span>双向 DiT，整段短片 <span class="why">学 \(q_{\mathrm{bi}}\)</span></span></div>
+  <div class="step"><b>强迫</b><span>块因果 mask，干净历史 <span class="why">补「只看过去」；历史仍是数据</span></span></div>
+  <div class="step"><b>短程</b><span>自己滚出来的历史 + DMD <span class="why">补 \(K\)；历史仍短</span></span></div>
+  <div class="step"><b>长程</b><span>拼接 + 固定窗口 <span class="why">补长度</span></span></div>
+  <div class="step"><b>搜索</b><span>窗口多长、要不要重置位置 <span class="why">补 \(\mathcal{H}_i\)；仍不是模型参数</span></span></div>
+</div>
+<p class="figure-caption">缺口按出现顺序一层层补上去。每一级多一组要调的量。</p>
+
+<p>原生要求两件事同时成立：训练时条件只能看见已经发生的过去；每一个因子对应一次网络计算。现在通行的扩散自回归，两件都不成立。</p>
+<p><strong>训练看见的不是只有过去。</strong> 训练必须是 \(q_{\mathrm{train}}(v_t\mid\cdot)=p_{\mathrm{data}}(v_t\mid v_{<t})\)。若拟合的是 \(q_{\mathrm{bi}}\)，推理时加上因果 mask（当前块不许看后面的块）只是在测试时删掉训练用过的变量。模型从未在「只有过去」这个条件下出过梯度。</p>
+<p><strong>一次前向写出的也不是一个因子。</strong> 把时间切成块 \(B_1,\ldots,B_N\) 之后，声称的分解是 \(p(B_{1:N})=\prod_i p_\theta(B_i\mid B_{<i})\)。若这个因子被实现成</p>
+<p class="math-block">
+\[
+x_{\sigma_K}\sim\mathcal{N}(0,I),\quad
+x_{\sigma_k}=x_{\sigma_{k+1}}+(\sigma_k-\sigma_{k+1})\,v_\theta(x_{\sigma_{k+1}},\sigma_{k+1}\mid B_{<i},B_i^{\mathrm{noisy}}),
+\]
+</p>
+<p>真正的生成单元是一段常微分方程，不是 \(B_i\)。\(K\sim 30\) 是短片双向模型的积分长度；\(K=4\) 只是把同一种向量场的步数缩短，并没有变成 \(f_\theta(v_{<t})\)。</p>
+<p>训练时已经看见未来，推理就只好装上 mask，训练再用干净的过去做 teacher forcing——「只有过去」贵，也不稳：</p>
+<p class="math-block">
+\[
+q_{\mathrm{train}}(B_{<i})=p_{\mathrm{data}}(B_{<i}),\qquad
+q_{\mathrm{infer}}(B_{<i})=p_\theta(B_{<i}).
+\]
+</p>
+<p>左边是数据，右边是模型自己刚写出的块。Bengio 等的 scheduled sampling <a class="cite" id="cite-2" href="#ref-2">2</a>、Ranzato 等的序列级训练 <a class="cite" id="cite-3" href="#ref-3">3</a>、Self Forcing <a class="cite" id="cite-19" href="#ref-19">19</a>，说的都是这个缺口。缺口还在，就会再加一级：在模型自己滚出来的历史上做 DMD <a class="cite" id="cite-28" href="#ref-28">28</a>，再把损失加到已经带误差的历史上，\(\mathcal{L}_{\mathrm{long}}=\sum_k\mathcal{L}_{\mathrm{DMD}}^{(k)}\)。预训练从没在「只有过去」下出过梯度，这些阶段是事后补上的。</p>
+<p>一次前向仍是一段微分方程，就要蒸馏。Diffusion Forcing <a class="cite" id="cite-17" href="#ref-17">17</a>、CausVid <a class="cite" id="cite-18" href="#ref-18">18</a>、Self Forcing <a class="cite" id="cite-19" href="#ref-19">19</a>、Rolling Forcing <a class="cite" id="cite-20" href="#ref-20">20</a>、MAGI-1 <a class="cite" id="cite-21" href="#ref-21">21</a> 都在推理时做到不看未来，块里面仍用多步把 \(K\) 压下来。一次生成的前向次数是 \(N_{\mathrm{blocks}}\times K\)。\(K=4\) 时，网络参数化的仍是 \(v_\theta(x,\sigma)\)。</p>
+<p>训练条件没改、因子仍是多步积分，生成长度又要超过训练时见过的窗，就只能改推理时看得见的过去 \(\mathcal{H}_i\)：留住早期的几帧当锚点、只保留最近若干块、窗口滑走时重置位置编码。StreamingLLM <a class="cite" id="cite-13" href="#ref-13">13</a> 在语言里指出，滑动窗口需要锚点；FramePack <a class="cite" id="cite-26" href="#ref-26">26</a>、WorldMem <a class="cite" id="cite-27" href="#ref-27">27</a> 问的是 \(\mathcal{H}_i\) 里该留什么。这些改的是测试时看见谁，不是训练时拟合的是哪一个条件。</p>
+<p>现在通行的做法是按缺口出现的顺序一层层补上去的：</p>
+<pre><code># 扩散自回归（现在通行）                 # 原生（定义要求的）
+for i in 1..N:                          for t in 1..T:
+    x ~ N(0, I)                             v_t = f_θ(v_&lt;t, c_≤t)   # 一次前向
+    for σ in [1.0, 0.75, 0.50, 0.25]:      cache.write(v_t)
+        x = x + Δσ * v_θ(x, σ | B_&lt;i, x)
+    cache.write(x)</code></pre>
+<pre><code>预训练    双向 DiT，整段短片              # 学 q_bi
+→ 强迫    块因果 mask，干净历史           # 补「只看过去」；历史仍是数据
+→ 短程    自己滚出来的历史 + DMD          # 补 K；历史仍短
+→ 长程    拼接 + 固定窗口                 # 补长度
+→ 搜索    窗口多长、要不要重置位置         # 补 H_i；仍不是模型参数</code></pre>
+<p>每一级多一组要调的量。若预训练从未使用 \(v_{>t}\)，并且在声称的时间单元上一次前向就写出一个因子，这些级就没有必要存在。</p>
+<p>块该切多长，本身也是被逼出来的折中，不是可以随便选的设计。一块一帧，剩下的微分方程没有块内运动可积；一块接近一秒，又回到带边界缓存的短片模型。三帧既短到可以边写边吐，又给块内双向去噪留了空间，所以成了常见折中。原生模型必须在预训练就选定这个单元——一帧，或一块一次前向——而不是对共享 mask 的三帧再积分。</p>
+<h2 id="补充实验">补充实验</h2>
+
+<div class="pair">
+  <div class="card">
+    <div class="tag">第一组 · 改权重</div>
+    <h3>更晚的后训练</h3>
+    <p>采样和窗口固定。同一块 \(B_i\) 里纹理更干净。跨块时间一致性没有稳定随之变好。</p>
+  </div>
+  <div class="card">
+    <div class="tag">第二组 · \(\mathcal{H}_i\)</div>
+    <h3>窗口和重置</h3>
+    <p>生成器固定。加长窗口，或开关位置 / 位姿重置，改的是测试时看见谁，不是训练条件。</p>
+  </div>
+</div>
+
+<p>我们在 Echo-WM-Flash <a class="cite" id="cite-1" href="#ref-1">1</a> 上额外做了两组闭环、长程一致性实验，论文公开表里没有。一组改后训练阶段，一组只改推理时看得见的过去 \(\mathcal{H}_i\)。</p>
+<p>后训练如果优化的是块内去噪，可以改善同一块 \(B_i\) 里的外观，而不必改善 \(\prod_t p(v_t\mid v_{<t})\) 所要求的、块与块之间的条件。只改 \(\mathcal{H}_i\)，改变的是测试时看见谁，不是训练时拟合的条件。</p>
+<p>第一组固定采样和窗口，比较不同后训练阶段的生成器。更晚的检查点，在同一块 \(B_i\) 里纹理更干净；跨块的时间一致性没有稳定随之变好。我们做的这类后训练，优化的是块内目标。乘积分解要求的条件在块与块之间。</p>
+<p>第二组固定生成器，只改变 \(\mathcal{H}_i\)：加长推理窗口，以及打开或关闭位置与位姿编码的重置。二者都不改变训练时拟合的条件。窗口和训练不一致时，偏差出现在块与块的接缝；重置和训练不一致时，相对位置编码对应另一套几何。跨块一致性没有因此稳定变好。改的是测试时看见谁，不是把 \(q_{\mathrm{bi}}\) 换成 \(p(v_t\mid v_{<t})\)。</p>
+<h2 id="对原生设计意味着什么">对原生设计意味着什么</h2>
+<p>Flash 上的观察和前面的分析指向同一件事：块内后训练，以及推理期改窗口、开关重置，都到不了 \(p(v_t\mid v_{<t})\)。若预训练就要拟合 \(p(v_t\mid v_{<t},c_{\le t})\)，并在选定的时间单元上一次前向写出这个因子，下面几件事是跟着来的。</p>
+<p><strong>块内后训练补不上跨块条件。</strong> Flash 上更晚的后训练已经说明：块内损失会把能力花在 \(B_i\) 的外观上。要把 \(\prod_t p(v_t\mid v_{<t})\) 学到手，预训练的条件就必须是过去，而不是再加一个外观更好的蒸馏阶段。继续预训练一条已经双向的 DiT，可以保留初始化，但时间上的未来须从第一步起就看不见。更干净的做法是同一套隐空间、帧内仍双向，时间 mask 从随机初始化就因果。VideoGPT <a class="cite" id="cite-7" href="#ref-7">7</a> 写过这个分解，离散码本偏弱；缺的是它落在 DiT 和现有视频 VAE 上 <a class="cite" id="cite-12" href="#ref-12">12</a> <a class="cite" id="cite-15" href="#ref-15">15</a> <a class="cite" id="cite-16" href="#ref-16">16</a>。损失可以仍是流匹配，改的是条件：</p>
+<p class="math-block">
+\[
+\mathcal{L}
+=\mathbb{E}_{t,\sigma}\bigl\|
+v_\theta(x_{\sigma,t},\sigma\mid v_{<t},c_{\le t})
+-(\varepsilon-v_t)\bigr\|_2^2,
+\]
+</p>
+<p>\(\sigma\) 只加在当前单元上，梯度不经过 \(v_{>t}\)。少步一致性训练若要当作 \(K=1\) 的手段，须从一开始就在 \(q_{\mathrm{AR}}\) 下进行。先学 \(q_{\mathrm{bi}}\) 再压缩步数，会再次把能力花在块内积分上——这正是第一组实验里后训练擅长、却带不走跨块一致性的那件事。自身滚动加 DMD 可以继续补这个缺口，但那是上一节已经写过的补丁链，不是原生。</p>
+<p><strong>加长窗口、开关重置，改的不是训练条件。</strong> 第二组实验改变 \(\mathcal{H}_i\) 而不改变训练条件，跨块一致性没有稳定变好。因此原生里，看得见的过去必须是结构：要么就是 \(v_{<t}\)（因果注意力的缓存），要么是模型参数里对 \(v_{<t}\) 的压缩，并且梯度能通过这段历史传回去。固定「留多少锚点、留多少最近帧」、再搜索要不要重置位置编码，只在把 \(q_{\mathrm{bi}}\) 改造成 \(q_{\mathrm{AR}}\) 时才有必要。FramePack <a class="cite" id="cite-26" href="#ref-26">26</a>、WorldMem <a class="cite" id="cite-27" href="#ref-27">27</a> 问的是这段历史里该留什么；答案不能是再扫一轮和训练对不齐的窗口。</p>
+<p><strong>时间单元在预训练选定，测试时不再对块内积分。</strong> 第一组实验改善的是块内去噪器的输出，说明现在这个学生的能力仍绑在 \(K\) 步向量场上。原生若声称一块（或一帧）是一个因子，测试时就不能再对这块做 \(K\) 步积分。一次前向写一帧，最接近语言里的一个词；一次前向写 \(L>1\) 帧，块内可以双向，每次吐出的长度变粗。两者都可以，但 \(L\) 不能再当成推理超参数：改 \(L\) 就是改因子。块长若仍留给测试时折中，就会回到三帧加一段微分方程的局面，后训练会再次优化这段方程。</p>
+<p><strong>评价要看跨块，不能只看块内是否干净。</strong> 第一组实验里，块内更干净和跨块更一致是分开的。若用短片段、块内指标决定何时停训，会重复这条分叉。应当用同一套权重、同一种一次前向，从第一秒量到超过训练窗的长度，并在 \(c_t\) 中途改变时看条件是否仍只依赖 \(v_{<t}\)。双向模型在十秒片段上继续更好看，是 \(q_{\mathrm{bi}}\) 本来就该赢的区间，不能据此说原生这条路错了。</p>
+<p><strong>数据也要按「过去已经发生」来切。</strong> 等长的短片段把未来帧当成免费特征。\(q_{\mathrm{AR}}\) 要求数据里的过去也是已经发生的过去：更长的连续镜头、带时间戳的 \(c_t\)、中途才出现的条件。不改训练条件的干预带不来跨块一致性，第二组实验已经见过。</p>
+<p>仍开放、而且值得在再调窗口之前回答的，是乘积本身上的选择。已经双向的大规模视频骨干，只做时间因果的继续预训练，要多久才能去掉 \(q_{\mathrm{bi}}\) 留下的习惯，是否必须重新初始化？连续隐空间上 \(K=1\) 是否稳定，还是需要更强的离散或混合码本？原生目标下，一帧一次前向和三帧一次前向，哪一个更能同时保住运动和延迟？学出来的 \(\mathcal{H}_i\) 要不要直接接收跨块一致性的信号——第二组实验表明，没有这条信号的窗口搜索，并不改变分解。</p>
+<p>2021 年离开这条路，是因为当时要的是短片段，\(q_{\mathrm{bi}}\) 在那上面合理。现在要测的是流。Flash <a class="cite" id="cite-1" href="#ref-1">1</a> 上我们试过的后训练，以及推理期对 \(\mathcal{H}_i\) 的搜索，到不了 \(p(v_t\mid v_{<t})\)。剩下可走的一步，是预训练就改训练时能看见的变量。在那之前，「自回归视频」仍是先按整段短片去噪、再在推理时改成只看过去的模型。</p>
+<h2 id="references">References</h2>
+<div class="refs"><ol>
+<li id="ref-1">Zhang, S., Li, Y., Zhuang, J., Jin, W., et al. <em>EchoWM: Open and Enterable Omnimodal World Models.</em> arXiv:2608.23189, 2026. <a href="https://arxiv.org/abs/2608.23189">https://arxiv.org/abs/2608.23189</a></li>
+<li id="ref-2">Bengio, S., Vinyals, O., Jaitly, N., and Shazeer, N. <em>Scheduled Sampling for Sequence Prediction with Recurrent Neural Networks.</em> NeurIPS, 2015.</li>
+<li id="ref-3">Ranzato, M., Chopra, S., Auli, M., and Zaremba, W. <em>Sequence Level Training with Recurrent Neural Networks.</em> ICLR, 2016. <a href="https://arxiv.org/abs/1511.06732">https://arxiv.org/abs/1511.06732</a></li>
+<li id="ref-4">van den Oord, A., Kalchbrenner, N., and Kavukcuoglu, K. <em>Pixel Recurrent Neural Networks.</em> ICML, 2016. <a href="https://arxiv.org/abs/1601.06759">https://arxiv.org/abs/1601.06759</a></li>
+<li id="ref-5">Kalchbrenner, N., van den Oord, A., Simonyan, K., et al. <em>Video Pixel Networks.</em> 2016. <a href="https://arxiv.org/abs/1610.00527">https://arxiv.org/abs/1610.00527</a></li>
+<li id="ref-6">Devlin, J., Chang, M.-W., Lee, K., and Toutanova, K. <em>BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding.</em> NAACL, 2019.</li>
+<li id="ref-7">Yan, W., Zhang, Y., Abbeel, P., and Srinivas, A. <em>VideoGPT: Video Generation using VQ-VAE and Transformers.</em> 2021. <a href="https://arxiv.org/abs/2104.10157">https://arxiv.org/abs/2104.10157</a></li>
+<li id="ref-8">Chang, H., Zhang, H., Jiang, L., Liu, C., and Freeman, W. T. <em>MaskGIT: Masked Generative Image Transformer.</em> CVPR, 2022. <a href="https://arxiv.org/abs/2202.04200">https://arxiv.org/abs/2202.04200</a></li>
+<li id="ref-9">Ge, S., Hayes, T., Yang, H., et al. <em>Long Video Generation with Time-Agnostic VQGAN and Time-Sensitive Transformer.</em> ECCV, 2022. <a href="https://arxiv.org/abs/2204.03638">https://arxiv.org/abs/2204.03638</a></li>
+<li id="ref-10">Villegas, R., Babaeizadeh, M., Kindermans, P.-J., et al. <em>Phenaki: Variable Length Video Generation from Open Domain Textual Descriptions.</em> 2022. <a href="https://arxiv.org/abs/2210.02399">https://arxiv.org/abs/2210.02399</a></li>
+<li id="ref-11">Yu, L., Cheng, Y., Sohn, K., et al. <em>MAGVIT: Masked Generative Video Transformer.</em> ICLR, 2023. <a href="https://arxiv.org/abs/2212.05199">https://arxiv.org/abs/2212.05199</a></li>
+<li id="ref-12">Peebles, W., and Xie, S. <em>Scalable Diffusion Models with Transformers.</em> ICCV, 2023. <a href="https://arxiv.org/abs/2212.09748">https://arxiv.org/abs/2212.09748</a></li>
+<li id="ref-13">Xiao, G., Tian, Y., Chen, B., Han, S., and Lewis, M. <em>Efficient Streaming Language Models with Attention Sinks.</em> ICLR, 2024. <a href="https://arxiv.org/abs/2309.17453">https://arxiv.org/abs/2309.17453</a></li>
+<li id="ref-14">OpenAI. <em>Video generation models as world simulators (Sora).</em> 2024. <a href="https://openai.com/index/video-generation-models-as-world-simulators/">https://openai.com/index/video-generation-models-as-world-simulators/</a></li>
+<li id="ref-15">HaCohen, Y., Chiprut, N., Brazowski, B., et al. <em>LTX-Video: Realtime Video Latent Diffusion.</em> 2024. <a href="https://arxiv.org/abs/2501.00103">https://arxiv.org/abs/2501.00103</a>  <br>Lightricks. <em>LTX-2 / LTX-2.3.</em> 2025–2026.</li>
+<li id="ref-16">Wan Team. <em>Wan: Open and Advanced Large-Scale Video Generative Models.</em> 2025. <a href="https://arxiv.org/abs/2503.20314">https://arxiv.org/abs/2503.20314</a></li>
+<li id="ref-17">Chen, B., Martí Monsó, D., Du, Y., et al. <em>Diffusion Forcing: Next-token Prediction Meets Full-Sequence Diffusion.</em> 2024. <a href="https://arxiv.org/abs/2407.01392">https://arxiv.org/abs/2407.01392</a></li>
+<li id="ref-18">Yin, T., Zhang, Q., Zhang, R., Freeman, W. T., Durand, F., Shechtman, E., and Huang, X. <em>From Slow Bidirectional to Fast Autoregressive Video Diffusion Models (CausVid).</em> 2024. <a href="https://arxiv.org/abs/2412.07772">https://arxiv.org/abs/2412.07772</a></li>
+<li id="ref-19">Huang, X., Li, Z., He, G., Zhou, M., and Shechtman, E. <em>Self Forcing: Bridging the Train-Test Gap in Autoregressive Video Diffusion.</em> NeurIPS, 2025. <a href="https://arxiv.org/abs/2506.08009">https://arxiv.org/abs/2506.08009</a></li>
+<li id="ref-20">Liu, K., Hu, W., Xu, J., Shan, Y., and Lu, S. <em>Rolling Forcing: Autoregressive Long Video Diffusion in Real Time.</em> 2025. <a href="https://arxiv.org/abs/2509.25161">https://arxiv.org/abs/2509.25161</a></li>
+<li id="ref-21">Teng, H., Jia, H., Sun, L., et al. <em>MAGI-1: Autoregressive Video Generation at Scale.</em> Sand AI, 2025. <a href="https://arxiv.org/abs/2505.13211">https://arxiv.org/abs/2505.13211</a></li>
+<li id="ref-22">Bruce, J., Dennis, M., Edwards, A., et al. <em>Genie: Generative Interactive Environments.</em> ICML, 2024. <a href="https://arxiv.org/abs/2402.15391">https://arxiv.org/abs/2402.15391</a></li>
+<li id="ref-23">NVIDIA. <em>Cosmos World Foundation Model Platform for Physical AI.</em> 2025. <a href="https://arxiv.org/abs/2501.03575">https://arxiv.org/abs/2501.03575</a></li>
+<li id="ref-24">Gao, Z., Wang, Q., Zhu, J., et al. <em>Infinite Worlds with Versatile Interactions (LingBot-World 2.0).</em> 2026. <a href="https://arxiv.org/abs/2607.07534">https://arxiv.org/abs/2607.07534</a></li>
+<li id="ref-25">Zhu, H., Liu, H., Zhao, Y., et al. <em>SANA-WM: Efficient Minute-Scale World Modeling with Hybrid Linear Diffusion Transformer.</em> 2026. <a href="https://arxiv.org/abs/2605.15178">https://arxiv.org/abs/2605.15178</a></li>
+<li id="ref-26">Zhang, L. <em>Packing Input Frame Context in Next-Frame Prediction Models (FramePack).</em> 2025. <a href="https://github.com/lllyasviel/FramePack">https://github.com/lllyasviel/FramePack</a></li>
+<li id="ref-27">Xiao, Z., Lan, Y., Zhou, Y., Ouyang, W., Yang, S., Zeng, Y., and Pan, X. <em>WorldMem: Long-term Consistent World Simulation with Memory.</em> NeurIPS, 2025. <a href="https://arxiv.org/abs/2504.12369">https://arxiv.org/abs/2504.12369</a></li>
+<li id="ref-28">Yin, T., Gharbi, M., Zhang, R., Shechtman, E., Durand, F., Freeman, W. T., and Park, T. <em>One-step Diffusion with Distribution Matching Distillation.</em> CVPR, 2024. <a href="https://arxiv.org/abs/2311.18828">https://arxiv.org/abs/2311.18828</a></li>
+</ol></div>
+      <footer class="note">EchoWM 的一篇配套笔记。文稿：<code>src/how_far_native_ar_video.zh.md</code>。</footer>
+    </article>
+  </div>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [
+      {left: '\\[', right: '\\]', display: true},
+      {left: '\\(', right: '\\)', display: false}
+    ]});"></script>
+</body>
+</html>
