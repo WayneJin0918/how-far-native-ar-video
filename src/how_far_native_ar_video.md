@@ -6,7 +6,7 @@ In language the meaning of autoregression is already settled. Pretraining fits
 p(w_{1:n})=\prod_i p(w_i\mid w_{<i}),
 \]
 
-and each factor is one forward pass. Training and test both see words already written. Nobody pretrains a bidirectional BERT [6], distills a student that “looks like GPT,” and calls the student native. A causal mask at inference does not make it native either.
+and each next step is one network evaluation. Training and test both see words already written. Nobody pretrains a bidirectional BERT [6], distills a student that “looks like GPT,” and calls the student native. A causal mask at inference does not make it native either.
 
 The video analogue is, for \(V=(v_1,\ldots,v_T)\),
 
@@ -14,7 +14,7 @@ The video analogue is, for \(V=(v_1,\ldots,v_T)\),
 p(V\mid c)=\prod_t p(v_t\mid v_{<t},c_{\le t}).
 \]
 
-\(c_t\) is a condition that has already occurred — text, a first frame, a camera pose, a key press. It may enter the conditional, but that does not license looking at \(v_{t+12}\), which has not happened yet. We call a model native autoregressive only if pretraining already fits this product and one forward emits one of its factors. Echo-WM-Flash [[1]](https://arxiv.org/abs/2608.23189) is one model we trained in the diffusion-autoregressive stack that is now standard; we use it below to see how far that stack sits from this definition.
+\(c_t\) is a condition that has already occurred — text, a first frame, a camera pose, a key press. It may enter the conditional, but that does not license looking at \(v_{t+12}\), which has not happened yet. We call a model native autoregressive only if pretraining already fits this product and the next step is one network evaluation. Echo-WM-Flash [[1]](https://arxiv.org/abs/2608.23189) is one model we trained in the diffusion-autoregressive stack that is now standard; we use it below to see how far that stack sits from this definition.
 
 ---
 
@@ -47,13 +47,13 @@ The field then took a path it did not have to take. VideoGPT [7] and TATS [9] al
 
 ---
 
-## Training sees the future, and one forward does not emit a factor
+## Training sees the future, and the next step is not one forward
 
-Native needs both: the training condition may see only the past that has already occurred, and each claimed factor is one network evaluation. The diffusion-autoregressive stack now in use has neither.
+Native needs both: the training condition may see only the past that has already occurred, and each claimed step is one network evaluation. The diffusion-autoregressive stack now in use has neither.
 
 **Training does not see only the past.** Training must be \(q_{\mathrm{train}}(v_t\mid\cdot)=p_{\mathrm{data}}(v_t\mid v_{<t})\). If the fit is \(q_{\mathrm{bi}}\), a causal mask at inference (the current block may not see later blocks) only deletes, at test time, variables that training used. The model never received a gradient under “past only.”
 
-**One forward does not emit a factor either.** After cutting time into blocks \(B_1,\ldots,B_N\), the claimed factorization is \(p(B_{1:N})=\prod_i p_\theta(B_i\mid B_{<i})\). If that factor is implemented as
+**One forward does not produce the next block either.** After cutting time into blocks \(B_1,\ldots,B_N\), the claimed factorization is \(p(B_{1:N})=\prod_i p_\theta(B_i\mid B_{<i})\). If that step is implemented as
 
 \[
 x_{\sigma_K}\sim\mathcal{N}(0,I),\quad
@@ -71,9 +71,9 @@ q_{\mathrm{infer}}(B_{<i})=p_\theta(B_{<i}).
 
 The left-hand side is data. The right-hand side is the block the model just wrote. Scheduled sampling [2], sequence-level training [3], and Self Forcing [19] name this gap. Training truly under “past only” is expensive and unstable. While the gap remains, another stage appears: first DMD [28] on a history the model rolled out itself, then the same loss on a longer history that already contains error, \(\mathcal{L}_{\mathrm{long}}=\sum_k\mathcal{L}_{\mathrm{DMD}}^{(k)}\). Pretraining never produced a gradient under “past only”; these stages were added afterwards.
 
-Because one forward is still a differential equation, distillation appears. Diffusion Forcing [17], CausVid [18], Self Forcing [19], Rolling Forcing [20], and MAGI-1 [21] all avoid the future at inference and still compress \(K\) with several steps inside the block. Forwards per generation scale as \(N_{\mathrm{blocks}}\times K\). At \(K=4\) the network still parameterizes \(v_\theta(x,\sigma)\).
+Because producing one step is still a differential equation, distillation appears. Diffusion Forcing [17], CausVid [18], Self Forcing [19], Rolling Forcing [20], and MAGI-1 [21] all avoid the future at inference and still compress \(K\) with several steps inside the block. Forwards per generation scale as \(N_{\mathrm{blocks}}\times K\). At \(K=4\) the network still parameterizes \(v_\theta(x,\sigma)\).
 
-The training condition is unchanged, and the factor is still a multi-step integral. Generation then has to run past the window seen in training, so the visible past \(\mathcal{H}_i\) is edited: keep a few early frames as an anchor, keep only recent blocks, reset position encodings when the window moves. StreamingLLM [13] showed that a sliding window in language needs an anchor; FramePack [26] and WorldMem [27] asked what \(\mathcal{H}_i\) should hold. These changes decide who is visible at test time. They do not decide which conditional training fits.
+The training condition is unchanged, and each step is still a multi-step integral. Generation then has to run past the window seen in training, so the visible past \(\mathcal{H}_i\) is edited: keep a few early frames as an anchor, keep only recent blocks, reset position encodings when the window moves. StreamingLLM [13] showed that a sliding window in language needs an anchor; FramePack [26] and WorldMem [27] asked what \(\mathcal{H}_i\) should hold. These changes decide who is visible at test time. They do not decide which conditional training fits.
 
 The stack now in use is patched in the order the gaps show up:
 
@@ -94,7 +94,7 @@ pretrain  bidirectional DiT, full short clip  # learns q_bi
 → search  window size, whether to reset pos.  # patch H_i; still not parameters
 ```
 
-Each extra stage adds quantities to tune. If pretraining never used \(v_{>t}\), and one forward emits one factor at the claimed temporal unit, those stages have nothing they need to patch.
+Each extra stage adds quantities to tune. If pretraining never used \(v_{>t}\), and the next step at the claimed timescale is one network evaluation, those stages have nothing they need to patch.
 
 How long a block should be is itself a forced compromise, not a free choice. If a block is one frame, there is no intra-block motion to integrate, and the leftover steps are only spatial denoising. If a block is near one second, the setup is again a short-clip model with a cache on the cut. Three frames are short enough to emit as you go, and still leave room for bidirectional denoising inside the block, which is why that length became common. A native model has to choose the unit at pretraining — one forward per frame, or one forward per block — rather than integrate again over three frames that share a mask.
 
@@ -114,7 +114,7 @@ In the second experiment, the generator is held fixed and only \(\mathcal{H}_i\)
 
 ## What that means for a native design
 
-The Flash observations and the analysis above point to the same thing: intra-block post-training, and changing the window or the reset at inference, do not reach \(p(v_t\mid v_{<t})\). If pretraining is to fit \(p(v_t\mid v_{<t},c_{\le t})\) and emit that factor in one forward at a chosen temporal unit, the design constraints below follow.
+The Flash observations and the analysis above point to the same thing: intra-block post-training, and changing the window or the reset at inference, do not reach \(p(v_t\mid v_{<t})\). If pretraining is to fit \(p(v_t\mid v_{<t},c_{\le t})\) and produce the next step in one forward at a chosen timescale, the design constraints below follow.
 
 **Post-training inside a block does not supply the condition between blocks.** Later post-training on Flash already shows that an intra-block loss spends capacity on appearance inside \(B_i\). To learn \(\prod_t p(v_t\mid v_{<t})\), the pretraining condition has to be the past. Another distillation stage with cleaner texture does not supply that condition. Continued pretraining of an already bidirectional DiT can keep the initialization, but the future in time must be invisible from the first step. A cleaner path keeps the same latent space and the same bidirectionality inside a frame, and makes the time mask causal from random initialization. VideoGPT [7] wrote this factorization; the discrete codebook was weak. What is missing is that factorization on a DiT and a current video VAE [12][15][16]. The loss can remain flow matching; the condition changes:
 
@@ -129,7 +129,7 @@ with \(\sigma\) applied only to the current unit and no gradient through \(v_{>t
 
 **A longer window, or turning a reset on and off, does not change the training condition.** The second experiment changes \(\mathcal{H}_i\) and not the training condition, and consistency across blocks does not reliably improve. In a native model the visible past is therefore part of the model: either \(v_{<t}\) itself (the causal-attention cache), or a compression of \(v_{<t}\) inside the parameters, with a gradient that flows back through that history. A fixed “how many anchors, how many recent frames,” plus a search over whether to reset position encodings, is needed only when \(q_{\mathrm{bi}}\) is being reshaped into \(q_{\mathrm{AR}}\). FramePack [26] and WorldMem [27] asked what that history should contain; the answer cannot be another sweep of a window that disagrees with training.
 
-**Choose the temporal unit at pretraining; do not integrate inside the block at test time.** The first experiment improves the output of an intra-block denoiser, which means the student’s capacity is still tied to a \(K\)-step vector field. If a native model claims that one block (or one frame) is one factor, test time cannot still integrate \(K\) steps over that block. One forward per frame is the closest analogue of a word in language; one forward over \(L>1\) frames may stay bidirectional inside the block, and each emitted segment is longer. Both are allowed, but \(L\) cannot remain a test-time hyperparameter: changing \(L\) changes the factor. If block length is still a compromise at test time, the setup returns to three frames plus a leftover differential equation, and post-training will optimize that equation again.
+**Choose the temporal unit at pretraining; do not integrate inside the block at test time.** The first experiment improves the output of an intra-block denoiser, which means the student’s capacity is still tied to a \(K\)-step vector field. If a native model claims that one block (or one frame) is one step, test time cannot still integrate \(K\) denoising steps over that block. One forward per frame is the closest analogue of a word in language; one forward over \(L>1\) frames may stay bidirectional inside the block, and each emitted segment is longer. Both are allowed, but \(L\) cannot remain a test-time hyperparameter: changing \(L\) changes how long that step is. If block length is still a compromise at test time, the setup returns to three frames plus a leftover differential equation, and post-training will optimize that equation again.
 
 **Measure across blocks, not by how clean a block looks.** In the first experiment, cleaner texture inside a block and better consistency across blocks come apart. If short clips and intra-block metrics decide when to stop training, that split will repeat. Use one set of weights and the same one-forward generation, measure from the first second past the training window, and when \(c_t\) changes mid-stream ask whether the condition still depends only on \(v_{<t}\). A bidirectional model that still looks better on a ten-second fragment is the interval where \(q_{\mathrm{bi}}\) is supposed to win. It does not show that the native path is wrong.
 
@@ -143,11 +143,11 @@ Leaving the VideoGPT-style temporal factorization in 2021 was rational: the prod
 
 ## Conclusion
 
-The argument collapses to one sentence. Native autoregression requires that pretraining already fit \(p(v_t\mid v_{<t},c_{\le t})\), and that one forward emit one of its factors. The stack now in use has neither: training sees the future, and one forward is still a differential equation. The two Flash experiments only checked this. Intra-block post-training cleans the same block; changing the window or the reset changes who is visible at test time; consistency across blocks does not reliably follow. Patches can make inference look autoregressive. They do not reach the product.
+The argument collapses to one sentence. Native autoregression requires that pretraining already fit \(p(v_t\mid v_{<t},c_{\le t})\), and that the next step be one network evaluation. The stack now in use has neither: training sees the future, and producing one step is still a differential equation. The two Flash experiments only checked this. Intra-block post-training cleans the same block; changing the window or the reset changes who is visible at test time; consistency across blocks does not reliably follow. Patches can make inference look autoregressive. They do not reach the product.
 
 We are still far from that native path. What is missing is not one more distillation stage, and not another sweep of the window. It is that the variables visible in pretraining were never \(v_{<t}\). Language settled this at pretraining: the fit is \(\prod_i p(w_i\mid w_{<i})\), and later abilities — long context, tools, reasoning — grew on that product. Video left the same factorization in 2021 for quality on short clips, and won for a few years. When the product being shipped became a stream, the field did not return to the product. It imitated it with a causal mask, a short integral, and a search over the window.
 
-Language models have moved quickly these years, not because they first made the next sentence look right and only later forced the model to see the past. They trained next-token prediction from the start, then scaled. If video keeps using “autoregressive” for a pipeline that is bidirectional first and causalized afterwards, the gap with language will only widen. What to learn is not a particular module, but the path itself: pretraining sees only the past that has already occurred, and one forward emits the factor that was claimed. Until then we are still at the door of the native road, and have not gone in.
+Language models have moved quickly these years, not because they first made the next sentence look right and only later forced the model to see the past. They trained next-token prediction from the start, then scaled. If video keeps using “autoregressive” for a pipeline that is bidirectional first and causalized afterwards, the gap with language will only widen. What to learn is not a particular module, but the path itself: pretraining sees only the past that has already occurred, and the next step is one network evaluation. Until then we are still at the door of that path, and have not gone in.
 
 ---
 

@@ -54,14 +54,14 @@ def slugify(title: str) -> str:
 
 TOC_LABEL = {
     "an-image-has-no-time-video-adds-t": "Time in video",
-    "training-sees-the-future-and-one-forward-does-not-emit-a-factor": "Training and one forward",
+    "training-sees-the-future-and-the-next-step-is-not-one-forward": "Training and one forward",
     "additional-experiments": "Experiments",
     "what-that-means-for-a-native-design": "A native design",
     "conclusion": "Conclusion",
     "references": "References",
     "cite": "Cite",
     "图像没有时间-视频多出来的是-t": "图像与时间",
-    "训练看见了未来-一次前向也写不出一个因子": "训练与前向",
+    "训练看见了未来-生成一步也不是一次网络计算": "训练与前向",
     "补充实验": "补充实验",
     "对原生设计意味着什么": "原生设计",
     "结论": "结论",
