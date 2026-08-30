@@ -11,6 +11,7 @@
     setupSee();
     setupStack();
     setupBib();
+    setupToc();
   });
 })();
 
@@ -99,6 +100,29 @@ function setupBib() {
       });
     });
   });
+}
+
+function setupToc() {
+  const links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+  if (!links.length) return;
+  const secs = links
+    .map(function (a) {
+      return { a: a, el: document.querySelector(a.getAttribute("href")) };
+    })
+    .filter(function (s) {
+      return s.el;
+    });
+  function sync() {
+    var cur = secs[0];
+    secs.forEach(function (s) {
+      if (s.el.getBoundingClientRect().top <= 140) cur = s;
+    });
+    links.forEach(function (a) {
+      a.classList.toggle("on", cur && a === cur.a);
+    });
+  }
+  document.addEventListener("scroll", sync, { passive: true });
+  sync();
 }
 
 function setupStack() {

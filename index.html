@@ -11,7 +11,15 @@
   <link rel="stylesheet" href="css/blog.css">
 </head>
 <body>
-  <main class="page">
+  <div class="shell">
+    <nav class="toc" aria-label="Contents"><p class="toc-k">Contents</p><ol><li><a href="#top">Introduction</a></li>
+<li><a href="#an-image-has-no-time-it-must-obey-video-adds-t">Time in video</a></li>
+<li><a href="#training-sees-the-future-and-one-forward-does-not-emit-a-factor">Training and one forward</a></li>
+<li><a href="#additional-experiments">Experiments</a></li>
+<li><a href="#what-that-means-for-a-native-design">A native design</a></li>
+<li><a href="#references">References</a></li>
+<li><a href="#cite">Cite</a></li></ol></nav>
+    <main class="page">
     <header class="mast">
       <p class="date">31 August 2026</p>
       <nav class="lang">
@@ -20,7 +28,7 @@
       </nav>
     </header>
     <article>
-      <h1>How Far We Are From a Native Autoregressive Video Model</h1>
+      <h1 id="top">How Far We Are From a Native Autoregressive Video Model</h1>
       <p class="byline">Weiyang Jin, The University of Hong Kong</p>
       <p>In language the meaning of autoregression is already settled. Pretraining fits</p>
 <div class="math-block">\[
@@ -140,7 +148,7 @@ q_{\mathrm{infer}}(B_{&lt;i})=p_\theta(B_{&lt;i}).
 <p>We ran two extra closed-loop, long-horizon consistency experiments on Echo-WM-Flash <a class="cite" href="#ref-1">1</a> that the paper does not report. One varies the post-training stage; the other changes only the visible past \(\mathcal{H}_i\) at inference.</p>
 <p>If post-training optimizes denoising inside a block, it can improve appearance inside the same block \(B_i\) without improving the condition between blocks that \(\prod_t p(v_t\mid v_{&lt;t})\) requires. Changing only \(\mathcal{H}_i\) changes who is visible at test time, not the condition fitted in training.</p>
 <figure class="fig fig-exp">
-  <table class="matrix"><tr><th></th><th>Appearance inside a block</th><th>Consistency across blocks</th></tr><tr><td>Later post-training</td><td class="up">Cleaner in the same block</td><td class="flat">No reliable gain</td></tr><tr><td>Inference window / reset only</td><td>—</td><td class="flat">No reliable gain</td></tr></table>
+  <div class="matrix-wrap"><table class="matrix"><tr><th></th><th>Appearance inside a block</th><th>Consistency across blocks</th></tr><tr><td>Later post-training</td><td class="up">Cleaner in the same block</td><td class="flat">No reliable gain</td></tr><tr><td>Inference window / reset only</td><td>—</td><td class="flat">No reliable gain</td></tr></table></div>
 </figure>
 <p>In the first experiment, sampling and the window are held fixed, and generators from later post-training stages are compared. Later checkpoints have cleaner texture inside the same block \(B_i\). Temporal consistency across blocks does not reliably improve with them. The post-training we ran optimizes an intra-block objective. The product asks for a condition between blocks.</p>
 <p>In the second experiment, the generator is held fixed and only \(\mathcal{H}_i\) is changed: a longer inference window, and positional and pose resets turned on or off. Neither changes the condition fitted in training. When the window disagrees with training, a discrepancy appears at the seam between blocks. When the reset disagrees with training, relative position encodings point at a different geometry. Consistency across blocks does not reliably improve. The change is who is visible at test time, not a replacement of \(q_{\mathrm{bi}}\) by \(p(v_t\mid v_{&lt;t})\).</p>
@@ -204,7 +212,8 @@ v_\theta(x_{\sigma,t},\sigma\mid v_{&lt;t},c_{\le t})
       </div>
     </article>
     <footer class="credit">Visual style after <a href="https://thinkingmachines.ai/blog/on-policy-distillation/">Thinking Machines Lab</a>.</footer>
-  </main>
+    </main>
+  </div>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
   <script defer src="js/math.js"></script>

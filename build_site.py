@@ -52,6 +52,35 @@ def slugify(title: str) -> str:
     return re.sub(r"[^\w\u4e00-\u9fff]+", "-", title.lower()).strip("-") or "section"
 
 
+TOC_LABEL = {
+    "an-image-has-no-time-it-must-obey-video-adds-t": "Time in video",
+    "training-sees-the-future-and-one-forward-does-not-emit-a-factor": "Training and one forward",
+    "additional-experiments": "Experiments",
+    "what-that-means-for-a-native-design": "A native design",
+    "references": "References",
+    "cite": "Cite",
+    "图像没有时间-视频多出来的是-t": "图像与时间",
+    "训练看见了未来-一次前向也写不出一个因子": "训练与前向",
+    "补充实验": "补充实验",
+    "对原生设计意味着什么": "原生设计",
+}
+
+
+def toc_html(body: str, zh: bool) -> str:
+    zh_fixed = {"references": "参考文献", "cite": "引用"}
+    items = [("top", "引言" if zh else "Introduction")]
+    for sid, raw in re.findall(r'<h2 id="([^"]+)">(.*?)</h2>', body, flags=re.S):
+        label = (zh_fixed.get(sid) if zh else None) or TOC_LABEL.get(sid) or re.sub(r"<[^>]+>", "", raw)
+        items.append((sid, label))
+    if not any(sid == "cite" for sid, _ in items):
+        items.append(("cite", "引用" if zh else "Cite"))
+    lis = "\n".join(
+        f'<li><a href="#{html.escape(sid)}">{html.escape(label)}</a></li>' for sid, label in items
+    )
+    head = "目录" if zh else "Contents"
+    return f'<nav class="toc" aria-label="{head}"><p class="toc-k">{head}</p><ol>{lis}</ol></nav>'
+
+
 def fig_see(zh: bool) -> str:
     if zh:
         note_bi = "短片训练里，写第 5 帧时 1–8 都可以进条件。"
@@ -167,7 +196,7 @@ def fig_exp(zh: bool) -> str:
             "<td class=\"flat\">No reliable gain</td></tr>"
         )
     return f"""<figure class="fig fig-exp">
-  <table class="matrix">{rows}</table>
+  <div class="matrix-wrap"><table class="matrix">{rows}</table></div>
 </figure>"""
 
 
@@ -328,7 +357,9 @@ def page_html(cfg: dict, body: str) -> str:
   <link rel="stylesheet" href="css/blog.css">
 </head>
 <body>
-  <main class="page">
+  <div class="shell">
+    {toc_html(body, cfg["lang"].startswith("zh"))}
+    <main class="page">
     <header class="mast">
       <p class="date">{html.escape(cfg["date"])}</p>
       <nav class="lang">
@@ -337,7 +368,7 @@ def page_html(cfg: dict, body: str) -> str:
       </nav>
     </header>
     <article>
-      <h1>{html.escape(cfg["title"])}</h1>
+      <h1 id="top">{html.escape(cfg["title"])}</h1>
       <p class="byline">{html.escape(byline)}</p>
       {body}
       <h2 id="cite">{cite_h}</h2>
@@ -347,7 +378,8 @@ def page_html(cfg: dict, body: str) -> str:
       </div>
     </article>
     <footer class="credit">{credit}</footer>
-  </main>
+    </main>
+  </div>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
   <script defer src="js/math.js"></script>

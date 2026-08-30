@@ -11,7 +11,15 @@
   <link rel="stylesheet" href="css/blog.css">
 </head>
 <body>
-  <main class="page">
+  <div class="shell">
+    <nav class="toc" aria-label="目录"><p class="toc-k">目录</p><ol><li><a href="#top">引言</a></li>
+<li><a href="#图像没有时间-视频多出来的是-t">图像与时间</a></li>
+<li><a href="#训练看见了未来-一次前向也写不出一个因子">训练与前向</a></li>
+<li><a href="#补充实验">补充实验</a></li>
+<li><a href="#对原生设计意味着什么">原生设计</a></li>
+<li><a href="#references">参考文献</a></li>
+<li><a href="#cite">引用</a></li></ol></nav>
+    <main class="page">
     <header class="mast">
       <p class="date">2026年8月31日</p>
       <nav class="lang">
@@ -20,7 +28,7 @@
       </nav>
     </header>
     <article>
-      <h1>我们离原生自回归视频模型还有多远</h1>
+      <h1 id="top">我们离原生自回归视频模型还有多远</h1>
       <p class="byline">Weiyang Jin，香港大学</p>
       <p>语言模型里，自回归是什么，大家其实早就说清楚了。预训练拟合的是</p>
 <div class="math-block">\[
@@ -140,7 +148,7 @@ q_{\mathrm{infer}}(B_{&lt;i})=p_\theta(B_{&lt;i}).
 <p>我们在 Echo-WM-Flash <a class="cite" href="#ref-1">1</a> 上另外做了两组闭环、长程一致性实验，论文公开表里没有。一组换后训练阶段，一组只改推理时看得见的过去 \(\mathcal{H}_i\)。</p>
 <p>后训练如果优化的是块内去噪，同一块 \(B_i\) 里可以更好看，但不一定能改善 \(\prod_t p(v_t\mid v_{&lt;t})\) 要的、块与块之间的条件。只改 \(\mathcal{H}_i\)，改的是测试时看见谁，不是训练时拟合的条件。</p>
 <figure class="fig fig-exp">
-  <table class="matrix"><tr><th></th><th>块内观感</th><th>跨块一致性</th></tr><tr><td>更晚的后训练</td><td class="up">同一块里更干净</td><td class="flat">没有稳定跟着变好</td></tr><tr><td>只改推理窗口 / 重置</td><td>—</td><td class="flat">没有稳定跟着变好</td></tr></table>
+  <div class="matrix-wrap"><table class="matrix"><tr><th></th><th>块内观感</th><th>跨块一致性</th></tr><tr><td>更晚的后训练</td><td class="up">同一块里更干净</td><td class="flat">没有稳定跟着变好</td></tr><tr><td>只改推理窗口 / 重置</td><td>—</td><td class="flat">没有稳定跟着变好</td></tr></table></div>
 </figure>
 <p>第一组固定采样和窗口，比较不同后训练阶段的生成器。更晚的检查点，同一块 \(B_i\) 里纹理更干净；跨块的时间一致性并没有稳定跟着变好。我们做的这类后训练，优化的是块内目标。乘积要的条件在块与块之间。</p>
 <p>第二组固定生成器，只改 \(\mathcal{H}_i\)：加长推理窗口，以及打开或关掉位置、位姿编码的重置。两者都不改训练条件。窗口和训练对不上，偏差出在块与块的接缝；重置和训练对不上，相对位置编码会指向另一套几何。跨块一致性没有因此稳定变好。改的是测试时看见谁，不是把 \(q_{\mathrm{bi}}\) 换成 \(p(v_t\mid v_{&lt;t})\)。</p>
@@ -204,7 +212,8 @@ v_\theta(x_{\sigma,t},\sigma\mid v_{&lt;t},c_{\le t})
       </div>
     </article>
     <footer class="credit">版式参考了 <a href="https://thinkingmachines.ai/blog/on-policy-distillation/">Thinking Machines Lab</a> 的研究笔记，谨此致谢。</footer>
-  </main>
+    </main>
+  </div>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
   <script defer src="js/math.js"></script>
