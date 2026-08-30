@@ -53,7 +53,7 @@ def slugify(title: str) -> str:
 
 
 TOC_LABEL = {
-    "an-image-has-no-time-it-must-obey-video-adds-t": "Time in video",
+    "an-image-has-no-time-video-adds-t": "Time in video",
     "training-sees-the-future-and-one-forward-does-not-emit-a-factor": "Training and one forward",
     "additional-experiments": "Experiments",
     "what-that-means-for-a-native-design": "A native design",
