@@ -12,7 +12,7 @@ Author voice: Weiyang Jin (HKU). Use **我们 / we**. Do not switch to 我 / I.
 
 - The argument (native = pretrain \(p(v_t\mid v_{<t},c_{\le t})\) + next step is one network evaluation).
 - Equations, citation numbers, BibTeX, figure injection in `build_site.py` unless the user asked.
-- Flash judgments only. No leaked numbers, case names, SSIM, window sizes, or checkpoint IDs.
+- Flash is one model we trained in the current stack, not the definition of native AR. Judgments only. No leaked numbers, case names, SSIM, window sizes, or checkpoint IDs.
 - Do not invent a specific lookahead like \(v_{t+12}\). Future frames are \(v_{>t}\) or \(v_{t+1}\).
 
 ## Voice
@@ -26,7 +26,7 @@ Do not write:
 - leftover English calques: 「一次前向写出一个因子」, 「人还在回路里」, 「回传过梯度」 as a refrain
 - unexplained numbers, punchy metaphors (借口 / 戴上 mask / 赢的就是这一块 / 站在门口)
 - 本文 / this paper. This is a note. 这里 / in this note / we.
-- a conclusion that retells the whole essay. Restate the two conditions, what Flash checked, what to do next.
+- a conclusion that retells the whole essay. Restate the two conditions, that later patches do not reach them, and what has to change at pretraining. Do not make unpublished Flash runs the scope of “native.”
 
 TML is a **style** reference: calm we-voice, claim then why, one analogy at most. It is not a layout to copy (no hero, no sentence-tree cards).
 
