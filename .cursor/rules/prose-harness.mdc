@@ -1,0 +1,11 @@
+---
+description: Prose harness for the native-AR bilingual note. Apply when editing src/*.md or discussing this essay’s wording.
+globs: src/**/*.md
+alwaysApply: false
+---
+
+# Essay prose
+
+Before editing `src/how_far_native_ar_video.md` or `.zh.md`, read and follow [HARNESS.md](../../HARNESS.md).
+
+Do not skip the read-aloud / logic / leftover-AI loop. Do not translate Chinese into English. Rebuild with `python3 build_site.py` after content changes.

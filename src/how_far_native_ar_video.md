@@ -1,20 +1,20 @@
 # How Far We Are From a Native Autoregressive Video Model
 
-In language, autoregression stopped being a vague word a long time ago. Pretraining fits
+In language, the meaning of autoregression has been clear for a long time. Pretraining fits
 
 \[
 p(w_{1:n})=\prod_i p(w_i\mid w_{<i}),
 \]
 
-and the next word is one network evaluation. Training and test both see words already written. Nobody pretrains a bidirectional BERT [6], distills a student that “looks like GPT,” and calls that native. A causal mask at inference does not make it native either.
+and each next word is one network evaluation. Training and test both see words already written. Nobody pretrains a bidirectional BERT [6], distills a student that “looks like GPT,” and calls that native. A causal mask at inference does not make it native either.
 
-If video uses the same word, the analogue is, for \(V=(v_1,\ldots,v_T)\),
+If video uses the same word, write it as, for \(V=(v_1,\ldots,v_T)\),
 
 \[
 p(V\mid c)=\prod_t p(v_t\mid v_{<t},c_{\le t}).
 \]
 
-\(c_t\) is a condition that is already there: text, a first frame, a camera pose, a key press. It can enter the conditional. It does not let the model look at \(v_{>t}\), which has not happened yet. Native autoregression, in this note, means two things: pretraining already fits this product, and writing the next step is one network evaluation. Echo-WM-Flash [[1]](https://arxiv.org/abs/2608.23189) is a model we trained in the diffusion-autoregressive stack that is now standard. We use it below to see how far that stack sits from this definition.
+\(c_t\) is a condition that is already there: text, a first frame, a camera pose, a key press. It can enter the conditional. It does not let the model look at \(v_{>t}\), which has not happened yet. Here, native autoregression means two things: pretraining already fits this product, and writing the next step is one network evaluation. Echo-WM-Flash [[1]](https://arxiv.org/abs/2608.23189) is a model we trained in the diffusion-autoregressive stack that is now standard. We use it below as an example of how far that stack sits from this definition.
 
 ---
 
@@ -41,7 +41,7 @@ Once the test is a stream, the required conditional changes. Continuation, a \(c
 q_{\mathrm{AR}}(v_t\mid v_{<t},c_{\le t})=p_{\mathrm{data}}(v_t\mid v_{<t},c_{\le t}).
 \]
 
-Which variables training can see determines which function is learned. Swapping text, an image, or a pose for \(c_t\) adds one more term in the condition. It does not turn \(V_{\setminus t}\) into \(v_{<t}\). World models [22]–[25] made the mismatch visible early, because a person is still in the loop. Longer video and low-latency continuation expose the same mismatch.
+Which variables training can see determines which function is learned. Swapping text, an image, or a pose for \(c_t\) adds one more term in the condition. It does not turn \(V_{\setminus t}\) into \(v_{<t}\). World models [22]–[25] made the mismatch visible early, because a person is still interacting. Longer video and low-latency continuation run into the same mismatch.
 
 VideoGPT [7] and TATS [9] already wrote \(\prod_t p(v_t\mid v_{<t})\) over discrete symbols. Quality later lost to MaskGIT [8], MAGVIT [11], Phenaki [10], then to bidirectional models trained on short clips at DiT scale. Pictures improved; the temporal factorization was dropped. When the product being shipped became a stream, the field did not return to pretraining that sees only the past in time. It asked how to reshape an existing \(q_{\mathrm{bi}}\) so the test looks like \(q_{\mathrm{AR}}\). The pipeline that followed is doing that work.
 
@@ -51,7 +51,7 @@ VideoGPT [7] and TATS [9] already wrote \(\prod_t p(v_t\mid v_{<t})\) over discr
 
 By that definition, the diffusion-autoregressive stack now in use fails both conditions. Training sees the future. Each step as written is not one network evaluation.
 
-Start with training. It should be \(q_{\mathrm{train}}(v_t\mid\cdot)=p_{\mathrm{data}}(v_t\mid v_{<t})\). If the fit is \(q_{\mathrm{bi}}\), a causal mask at inference (the current block may not see later blocks) only deletes, at test time, variables that training used. The model never received a gradient under “past only.”
+Start with training. It should be \(q_{\mathrm{train}}(v_t\mid\cdot)=p_{\mathrm{data}}(v_t\mid v_{<t})\). If the fit is \(q_{\mathrm{bi}}\), a causal mask at inference (the current block may not see later blocks) only deletes, at test time, variables that training used. The model was never trained under “past only.”
 
 Then generation. After cutting time into \(B_1,\ldots,B_N\), the claimed factorization is \(p(B_{1:N})=\prod_i p_\theta(B_i\mid B_{<i})\). If that step is implemented as
 
@@ -62,14 +62,14 @@ x_{\sigma_k}=x_{\sigma_{k+1}}+(\sigma_k-\sigma_{k+1})\,v_\theta(x_{\sigma_{k+1}}
 
 what is generated is not \(B_i\), but a segment of an ordinary differential equation. \(K\sim 30\) is the integration length of the short-clip bidirectional model. \(K=4\) shortens the same vector field; it does not become \(f_\theta(v_{<t})\).
 
-These two gaps then produce a chain of post-training stages. Training already saw the future, so inference has to add a causal mask. Training history is clean data (teacher forcing); test history is the block the model just wrote:
+These two gaps then become a chain of post-training stages. Training already saw the future, so inference has to add a causal mask. Training history is clean data (teacher forcing); test history is the block the model just wrote:
 
 \[
 q_{\mathrm{train}}(B_{<i})=p_{\mathrm{data}}(B_{<i}),\qquad
 q_{\mathrm{infer}}(B_{<i})=p_\theta(B_{<i}).
 \]
 
-The left-hand side is data. The right-hand side is what the model just wrote. Scheduled sampling [2], sequence-level training [3], and Self Forcing [19] all address this gap. Training truly under “past only” is expensive and unstable. While the gap remains, another stage appears: first DMD [28] on a history the model rolled out itself, then the same loss on a longer history that already contains error, \(\mathcal{L}_{\mathrm{long}}=\sum_k\mathcal{L}_{\mathrm{DMD}}^{(k)}\). Pretraining never produced a gradient under “past only.” These stages were added afterwards.
+The left-hand side is data. The right-hand side is what the model just wrote. Scheduled sampling [2], sequence-level training [3], and Self Forcing [19] all address this gap. Training truly under “past only” is expensive and unstable. While the gap remains, another stage appears: first DMD [28] on a history the model rolled out itself, then the same loss on a longer history that already contains error, \(\mathcal{L}_{\mathrm{long}}=\sum_k\mathcal{L}_{\mathrm{DMD}}^{(k)}\). Pretraining was never run under “past only.” These stages were added afterwards.
 
 Producing one step is still a differential equation, so distillation appears. Diffusion Forcing [17], CausVid [18], Self Forcing [19], Rolling Forcing [20], and MAGI-1 [21] all avoid the future at inference and still compress \(K\) with several steps inside the block. Forwards per generation scale as \(N_{\mathrm{blocks}}\times K\). At \(K=4\) the network still parameterizes \(v_\theta(x,\sigma)\).
 
@@ -106,7 +106,7 @@ We ran two extra closed-loop, long-horizon consistency experiments on Echo-WM-Fl
 
 If post-training optimizes denoising inside a block, the same block \(B_i\) can look better without improving the condition between blocks. \(\prod_t p(v_t\mid v_{<t})\) is that between-block condition. Changing only \(\mathcal{H}_i\) changes who is visible at test time, not the condition fitted in training.
 
-In the first experiment, sampling and the window are held fixed, and generators from later post-training stages are compared. Later checkpoints have cleaner texture inside the same block \(B_i\). Temporal consistency across blocks does not reliably improve with them. The post-training we ran optimizes an intra-block objective. The temporal product wants a condition between blocks.
+In the first experiment, sampling and the window are held fixed, and generators from later post-training stages are compared. Later checkpoints have cleaner texture inside the same block \(B_i\). Temporal consistency across blocks does not reliably improve with them. The post-training we ran optimizes an intra-block objective. What the temporal product needs is a condition between blocks.
 
 In the second experiment, the generator is held fixed and only \(\mathcal{H}_i\) is changed: a longer inference window, and positional and pose resets turned on or off. Neither changes the condition fitted in training. When the window disagrees with training, a discrepancy appears at the seam between blocks. When the reset disagrees with training, relative position encodings point at a different geometry. Consistency across blocks does not reliably improve. What changed is who is visible at test time, not \(q_{\mathrm{bi}}\) for \(p(v_t\mid v_{<t})\).
 
@@ -127,7 +127,7 @@ v_\theta(x_{\sigma,t},\sigma\mid v_{<t},c_{\le t})
 
 with \(\sigma\) applied only to the current unit and no gradient through \(v_{>t}\). Few-step consistency training can be a route to \(K=1\) only if it is trained under \(q_{\mathrm{AR}}\) from the start. Learning \(q_{\mathrm{bi}}\) and then compressing the step count spends capacity on integration inside the block again. That is what the first experiment shows post-training is good at, and what does not transfer to consistency across blocks. Self-rollout plus DMD can keep patching this gap, but that is the post-training already described above, not a native model.
 
-**A longer window, or turning a reset on and off, does not change the training condition.** The second experiment changes \(\mathcal{H}_i\) and not the training condition, and consistency across blocks does not reliably improve. So in a native model the visible past should be inside the model: either \(v_{<t}\) itself (the causal-attention cache), or a compression of \(v_{<t}\) inside the parameters, with a gradient that flows back through that history. A fixed “how many anchors, how many recent frames,” plus a search over whether to reset position encodings, is needed only when \(q_{\mathrm{bi}}\) is being reshaped into \(q_{\mathrm{AR}}\). FramePack [26] and WorldMem [27] asked what that history should contain. The answer cannot be another sweep of a window that disagrees with training.
+**A longer window, or turning a reset on and off, does not change the training condition.** The second experiment changes \(\mathcal{H}_i\) and not the training condition, and consistency across blocks does not reliably improve. So in a native model the visible past should be part of the model: either \(v_{<t}\) itself (the causal-attention cache), or a compression of \(v_{<t}\) inside the parameters, with a gradient that flows back through that history. A fixed “how many anchors, how many recent frames,” plus a search over whether to reset position encodings, is needed only when \(q_{\mathrm{bi}}\) is being reshaped into \(q_{\mathrm{AR}}\). FramePack [26] and WorldMem [27] asked what that history should contain. The answer cannot be another sweep of a window that disagrees with training.
 
 **Choose the temporal unit at pretraining; do not integrate inside the block at test time.** The first experiment improves the output of an intra-block denoiser, which means the student’s capacity is still tied to a \(K\)-step vector field. If one block (or one frame) is one step, test time cannot still integrate \(K\) denoising steps over that block. One forward per frame is the closest analogue of a word in language; one forward over \(L>1\) frames may stay bidirectional inside the block, and each emitted segment is longer. Both are allowed, but \(L\) cannot remain a test-time hyperparameter: changing \(L\) changes how long that step is. If block length is still a compromise at test time, the setup returns to three frames plus a leftover differential equation, and post-training will optimize that equation again.
 
