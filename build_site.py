@@ -54,21 +54,11 @@ def slugify(title: str) -> str:
 
 def fig_see(zh: bool) -> str:
     if zh:
-        cap = "写当前帧时，训练条件看见谁。"
-        bi = "短片 · 双向"
-        ar = "流 · 自回归"
-        past, now, future = "已发生", "正在写", "还没有"
-        note_bi = "短片训练里，未来帧和当前帧在同一个样本里。写第 5 帧时，1–8 都可以进条件。"
-        note_ar = "流要求的条件只看见已经发生的过去。写第 5 帧时，6–8 还不存在。"
-        legend = f'<div class="see-legend"><span class="sw past"></span>{past}<span class="sw now"></span>{now}<span class="sw future"></span>{future}</div>'
+        note_bi = "短片训练里，写第 5 帧时 1–8 都可以进条件。"
+        note_ar = "流只看见已经发生的过去。写第 5 帧时，6–8 还不存在。"
     else:
-        cap = "What the training condition can see when writing the current frame."
-        bi = "short clip · bidirectional"
-        ar = "stream · autoregressive"
-        past, now, future = "past", "writing", "not yet"
-        note_bi = "On a short clip, future frames sit in the same example. Writing frame 5, 1–8 are all legal."
-        note_ar = "A stream only admits the past that has already occurred. Writing frame 5, 6–8 do not exist."
-        legend = f'<div class="see-legend"><span class="sw past"></span>{past}<span class="sw now"></span>{now}<span class="sw future"></span>{future}</div>'
+        note_bi = "On a short clip, writing frame 5, 1–8 are all legal."
+        note_ar = "A stream only admits the past. Writing frame 5, 6–8 do not exist."
 
     cells = []
     for i in range(1, 9):
@@ -76,10 +66,9 @@ def fig_see(zh: bool) -> str:
         cells.append(f'<div class="frame {kind}"><span>{i}</span></div>')
     frames = "\n          ".join(cells)
     return f"""<figure class="fig fig-see" data-mode="bi" data-note-bi="{html.escape(note_bi)}" data-note-ar="{html.escape(note_ar)}">
-  <figcaption class="fig-cap">{html.escape(cap)}</figcaption>
   <div class="see-toggle" role="tablist">
-    <button type="button" class="on" data-mode="bi">q<sub>bi</sub> · {html.escape(bi)}</button>
-    <button type="button" data-mode="ar">q<sub>AR</sub> · {html.escape(ar)}</button>
+    <button type="button" class="on" data-mode="bi">q<sub>bi</sub></button>
+    <button type="button" data-mode="ar">q<sub>AR</sub></button>
   </div>
   <div class="see-axis">
     <div class="lab">t</div>
@@ -87,14 +76,12 @@ def fig_see(zh: bool) -> str:
           {frames}
     </div>
   </div>
-  {legend}
   <p class="see-note">{html.escape(note_bi)}</p>
 </figure>"""
 
 
 def fig_loops(zh: bool) -> str:
     if zh:
-        cap = "一次前向写什么。左边仍是一段积分；右边才是定义要的因子。"
         left_h, right_h = "现在通行", "原生"
         left = """for i in 1..N:
     x ~ N(0, I)
@@ -105,7 +92,6 @@ def fig_loops(zh: bool) -> str:
     v_t = f_θ(v_<t, c_≤t)   # one forward
     cache.write(v_t)"""
     else:
-        cap = "What one forward emits. The left side is still an integral; the right side is the factor the definition asks for."
         left_h, right_h = "Current stack", "Native"
         left = """for i in 1..N:
     x ~ N(0, I)
@@ -116,7 +102,6 @@ def fig_loops(zh: bool) -> str:
     v_t = f_θ(v_<t, c_≤t)   # one forward
     cache.write(v_t)"""
     return f"""<figure class="fig fig-code">
-  <figcaption class="fig-cap">{html.escape(cap)}</figcaption>
   <div class="code-cols">
     <div class="code-col">
       <header>{html.escape(left_h)}</header>
@@ -132,8 +117,6 @@ def fig_loops(zh: bool) -> str:
 
 def fig_stack(zh: bool) -> str:
     if zh:
-        cap = "缺口露出来一层，就补一层。点开看每一级在补什么。"
-        foot = "如果预训练从来没用过未来，并且一次前向就写出一个因子，这些级没有要补的东西。"
         steps = [
             ("预训练", "双向 DiT，整段短片", "学的是 q_bi，不是 p(v_t | v_<t)。"),
             ("强迫", "块因果 mask，干净历史", "推理时删掉训练用过的未来；历史仍是数据。"),
@@ -142,8 +125,6 @@ def fig_stack(zh: bool) -> str:
             ("搜索", "窗口多长、要不要重置位置", "改的是 H_i，不是模型参数。"),
         ]
     else:
-        cap = "The stack is patched in the order the gaps show up. Click a stage."
-        foot = "If pretraining never used the future, and one forward emits one factor, these stages have nothing to patch."
         steps = [
             ("pretrain", "bidirectional DiT, full short clip", "Fits q_bi, not p(v_t | v_<t)."),
             ("force", "block-causal mask, clean history", "Deletes at test time variables training used. History is still data."),
@@ -162,17 +143,14 @@ def fig_stack(zh: bool) -> str:
             f"    </li>"
         )
     return f"""<figure class="fig fig-stack">
-  <figcaption class="fig-cap">{html.escape(cap)}</figcaption>
   <ol class="stack">
     {chr(10).join(items)}
   </ol>
-  <p class="stack-foot">{html.escape(foot)}</p>
 </figure>"""
 
 
 def fig_exp(zh: bool) -> str:
     if zh:
-        cap = "两组未公开实验只保留判断：改块内目标，或只改推理时看得见的过去。"
         rows = (
             "<tr><th></th><th>块内观感</th><th>跨块一致性</th></tr>"
             "<tr><td>更晚的后训练</td><td class=\"up\">同一块里更干净</td>"
@@ -181,7 +159,6 @@ def fig_exp(zh: bool) -> str:
             "<td class=\"flat\">没有稳定跟着变好</td></tr>"
         )
     else:
-        cap = "Judgments only from the two unpublished probes: change the intra-block objective, or change only who is visible at test time."
         rows = (
             "<tr><th></th><th>Appearance inside a block</th><th>Consistency across blocks</th></tr>"
             "<tr><td>Later post-training</td><td class=\"up\">Cleaner in the same block</td>"
@@ -190,7 +167,6 @@ def fig_exp(zh: bool) -> str:
             "<td class=\"flat\">No reliable gain</td></tr>"
         )
     return f"""<figure class="fig fig-exp">
-  <figcaption class="fig-cap">{html.escape(cap)}</figcaption>
   <table class="matrix">{rows}</table>
 </figure>"""
 
@@ -313,6 +289,17 @@ def md_to_html(md: str, zh: bool) -> str:
 def page_html(cfg: dict, body: str) -> str:
     en_on = "on" if cfg["lang"] == "en" else ""
     zh_on = "on" if cfg["lang"].startswith("zh") else ""
+    if cfg["lang"].startswith("zh"):
+        credit = (
+            '版式参考了 '
+            '<a href="https://thinkingmachines.ai/blog/on-policy-distillation/">Thinking Machines Lab</a> '
+            "的研究笔记，谨此致谢。"
+        )
+    else:
+        credit = (
+            'Visual style after '
+            '<a href="https://thinkingmachines.ai/blog/on-policy-distillation/">Thinking Machines Lab</a>.'
+        )
     return f"""<!DOCTYPE html>
 <html lang="{cfg["lang"]}">
 <head>
@@ -326,19 +313,20 @@ def page_html(cfg: dict, body: str) -> str:
   <link rel="stylesheet" href="css/blog.css">
 </head>
 <body>
-  <div class="wrap">
-  <nav class="bar">
-    <div class="lang">
-      <a href="index.html" class="{en_on}">English</a>
-      <a href="zh.html" class="{zh_on}">中文</a>
-    </div>
-  </nav>
-  <article>
-    <p class="date">{html.escape(cfg["date"])}</p>
-    <h1>{html.escape(cfg["title"])}</h1>
-    {body}
-  </article>
-  </div>
+  <main class="page">
+    <header class="mast">
+      <p class="date">{html.escape(cfg["date"])}</p>
+      <nav class="lang">
+        <a href="index.html" class="{en_on}">English</a>
+        <a href="zh.html" class="{zh_on}">中文</a>
+      </nav>
+    </header>
+    <article>
+      <h1>{html.escape(cfg["title"])}</h1>
+      {body}
+    </article>
+    <footer class="credit">{credit}</footer>
+  </main>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
   <script defer src="js/math.js"></script>

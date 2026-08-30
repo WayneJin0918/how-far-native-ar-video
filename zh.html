@@ -11,17 +11,17 @@
   <link rel="stylesheet" href="css/blog.css">
 </head>
 <body>
-  <div class="wrap">
-  <nav class="bar">
-    <div class="lang">
-      <a href="index.html" class="">English</a>
-      <a href="zh.html" class="on">中文</a>
-    </div>
-  </nav>
-  <article>
-    <p class="date">2026年8月31日</p>
-    <h1>我们离原生自回归视频模型还有多远</h1>
-    <p>语言模型里，自回归是什么，大家其实早就说清楚了。预训练拟合的是</p>
+  <main class="page">
+    <header class="mast">
+      <p class="date">2026年8月31日</p>
+      <nav class="lang">
+        <a href="index.html" class="">English</a>
+        <a href="zh.html" class="on">中文</a>
+      </nav>
+    </header>
+    <article>
+      <h1>我们离原生自回归视频模型还有多远</h1>
+      <p>语言模型里，自回归是什么，大家其实早就说清楚了。预训练拟合的是</p>
 <div class="math-block">\[
 p(w_{1:n})=\prod_i p(w_i\mid w_{&lt;i}),
 \]</div>
@@ -46,11 +46,10 @@ q_{\mathrm{bi}}(v_t\mid V_{\setminus t},c).
 <div class="math-block">\[
 q_{\mathrm{AR}}(v_t\mid v_{&lt;t},c_{\le t})=p_{\mathrm{data}}(v_t\mid v_{&lt;t},c_{\le t}).
 \]</div>
-<figure class="fig fig-see" data-mode="bi" data-note-bi="短片训练里，未来帧和当前帧在同一个样本里。写第 5 帧时，1–8 都可以进条件。" data-note-ar="流要求的条件只看见已经发生的过去。写第 5 帧时，6–8 还不存在。">
-  <figcaption class="fig-cap">写当前帧时，训练条件看见谁。</figcaption>
+<figure class="fig fig-see" data-mode="bi" data-note-bi="短片训练里，写第 5 帧时 1–8 都可以进条件。" data-note-ar="流只看见已经发生的过去。写第 5 帧时，6–8 还不存在。">
   <div class="see-toggle" role="tablist">
-    <button type="button" class="on" data-mode="bi">q<sub>bi</sub> · 短片 · 双向</button>
-    <button type="button" data-mode="ar">q<sub>AR</sub> · 流 · 自回归</button>
+    <button type="button" class="on" data-mode="bi">q<sub>bi</sub></button>
+    <button type="button" data-mode="ar">q<sub>AR</sub></button>
   </div>
   <div class="see-axis">
     <div class="lab">t</div>
@@ -65,8 +64,7 @@ q_{\mathrm{AR}}(v_t\mid v_{&lt;t},c_{\le t})=p_{\mathrm{data}}(v_t\mid v_{&lt;t}
           <div class="frame future"><span>8</span></div>
     </div>
   </div>
-  <div class="see-legend"><span class="sw past"></span>已发生<span class="sw now"></span>正在写<span class="sw future"></span>还没有</div>
-  <p class="see-note">短片训练里，未来帧和当前帧在同一个样本里。写第 5 帧时，1–8 都可以进条件。</p>
+  <p class="see-note">短片训练里，写第 5 帧时 1–8 都可以进条件。</p>
 </figure>
 <p>训练时能看见什么，学到的函数就不一样。\(c_t\) 换成文本、图像或位姿，只是右边多一个条件，并不会把左边的 \(V_{\setminus t}\) 变成 \(v_{&lt;t}\)。世界模型 <a class="cite" href="#ref-22">22</a>–<a class="cite" href="#ref-25">25</a> 很早就把这个错位露出来了，因为人还在里面玩；更长的视频、更低延迟的续写，碰到的是同一件事。</p>
 <p>后来走的路，其实可以不这么走。VideoGPT <a class="cite" href="#ref-7">7</a>、TATS <a class="cite" href="#ref-9">9</a> 已经在离散符号上写过 \(\prod_t p(v_t\mid v_{&lt;t})\)。画质输给 MaskGIT <a class="cite" href="#ref-8">8</a>、MAGVIT <a class="cite" href="#ref-11">11</a>、Phenaki <a class="cite" href="#ref-10">10</a>，再输给按整段短片训的 DiT 级双向模型。图好看了，时间上的分解却丢掉了。产品变成流之后，领域没有回到「时间上只看过去」的预训练，而是在问：已经训好的 \(q_{\mathrm{bi}}\)，怎么改一改，让测试看起来像 \(q_{\mathrm{AR}}\)。后面整条流水线，都是在答这道题。</p>
@@ -89,7 +87,6 @@ q_{\mathrm{infer}}(B_{&lt;i})=p_\theta(B_{&lt;i}).
 <p>训练条件没改，因子还是多步积分，生成又要比训练窗更长，就只能改推理时看得见的过去 \(\mathcal{H}_i\)：留几帧早期的当锚点、只留最近几块、窗口滑走时重置位置编码。StreamingLLM <a class="cite" href="#ref-13">13</a> 在语言里说过，滑动窗口需要锚点；FramePack <a class="cite" href="#ref-26">26</a>、WorldMem <a class="cite" href="#ref-27">27</a> 问的是 \(\mathcal{H}_i\) 里该留什么。这些改的是测试时看见谁，不是训练时拟合的是哪一个条件。</p>
 <p>现在通行的做法，是缺口露出来一层、补一层：</p>
 <figure class="fig fig-code">
-  <figcaption class="fig-cap">一次前向写什么。左边仍是一段积分；右边才是定义要的因子。</figcaption>
   <div class="code-cols">
     <div class="code-col">
       <header>现在通行</header>
@@ -108,7 +105,6 @@ q_{\mathrm{infer}}(B_{&lt;i})=p_\theta(B_{&lt;i}).
   </div>
 </figure>
 <figure class="fig fig-stack">
-  <figcaption class="fig-cap">缺口露出来一层，就补一层。点开看每一级在补什么。</figcaption>
   <ol class="stack">
     <li class="on">
       <span class="k">预训练</span>
@@ -136,7 +132,6 @@ q_{\mathrm{infer}}(B_{&lt;i})=p_\theta(B_{&lt;i}).
       <p class="why">改的是 H_i，不是模型参数。</p>
     </li>
   </ol>
-  <p class="stack-foot">如果预训练从来没用过未来，并且一次前向就写出一个因子，这些级没有要补的东西。</p>
 </figure>
 <p>每一级都多一组要调的量。如果预训练从来没用过 \(v_{&gt;t}\)，并且在说好的时间单元上一次前向就写出一个因子，这些级根本不必存在。</p>
 <p>块该切多长，也是被逼出来的折中，不是可以随便选的。一块一帧，剩下的微分方程没有块内运动可积；一块接近一秒，又变回带边界缓存的短片模型。三帧既能边写边出，又给块内双向去噪留了空间，所以成了常见折中。原生模型得在预训练就定下这个单元——一帧，或一块一次前向——而不是对共享 mask 的三帧再积分一遍。</p>
@@ -144,7 +139,6 @@ q_{\mathrm{infer}}(B_{&lt;i})=p_\theta(B_{&lt;i}).
 <p>我们在 Echo-WM-Flash <a class="cite" href="#ref-1">1</a> 上另外做了两组闭环、长程一致性实验，论文公开表里没有。一组换后训练阶段，一组只改推理时看得见的过去 \(\mathcal{H}_i\)。</p>
 <p>后训练如果优化的是块内去噪，同一块 \(B_i\) 里可以更好看，但不一定能改善 \(\prod_t p(v_t\mid v_{&lt;t})\) 要的、块与块之间的条件。只改 \(\mathcal{H}_i\)，改的是测试时看见谁，不是训练时拟合的条件。</p>
 <figure class="fig fig-exp">
-  <figcaption class="fig-cap">两组未公开实验只保留判断：改块内目标，或只改推理时看得见的过去。</figcaption>
   <table class="matrix"><tr><th></th><th>块内观感</th><th>跨块一致性</th></tr><tr><td>更晚的后训练</td><td class="up">同一块里更干净</td><td class="flat">没有稳定跟着变好</td></tr><tr><td>只改推理窗口 / 重置</td><td>—</td><td class="flat">没有稳定跟着变好</td></tr></table>
 </figure>
 <p>第一组固定采样和窗口，比较不同后训练阶段的生成器。更晚的检查点，同一块 \(B_i\) 里纹理更干净；跨块的时间一致性并没有稳定跟着变好。我们做的这类后训练，优化的是块内目标。乘积要的条件在块与块之间。</p>
@@ -194,8 +188,9 @@ v_\theta(x_{\sigma,t},\sigma\mid v_{&lt;t},c_{\le t})
 <li id="ref-26">Zhang, L. <em>Packing Input Frame Context in Next-Frame Prediction Models (FramePack).</em> 2025. <a href="https://github.com/lllyasviel/FramePack">https://github.com/lllyasviel/FramePack</a></li>
 <li id="ref-27">Xiao, Z., Lan, Y., Zhou, Y., Ouyang, W., Yang, S., Zeng, Y., and Pan, X. <em>WorldMem: Long-term Consistent World Simulation with Memory.</em> NeurIPS, 2025. <a href="https://arxiv.org/abs/2504.12369">https://arxiv.org/abs/2504.12369</a></li>
 <li id="ref-28">Yin, T., Gharbi, M., Zhang, R., Shechtman, E., Durand, F., Freeman, W. T., and Park, T. <em>One-step Diffusion with Distribution Matching Distillation.</em> CVPR, 2024. <a href="https://arxiv.org/abs/2311.18828">https://arxiv.org/abs/2311.18828</a></li></ol></div>
-  </article>
-  </div>
+    </article>
+    <footer class="credit">版式参考了 <a href="https://thinkingmachines.ai/blog/on-policy-distillation/">Thinking Machines Lab</a> 的研究笔记，谨此致谢。</footer>
+  </main>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
   <script defer src="js/math.js"></script>
