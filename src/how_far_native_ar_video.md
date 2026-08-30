@@ -141,6 +141,16 @@ Leaving the VideoGPT-style temporal factorization in 2021 was rational: the prod
 
 ---
 
+## Conclusion
+
+The argument collapses to one sentence. Native autoregression requires that pretraining already fit \(p(v_t\mid v_{<t},c_{\le t})\), and that one forward emit one of its factors. The stack now in use has neither: training sees the future, and one forward is still a differential equation. The two Flash experiments only checked this. Intra-block post-training cleans the same block; changing the window or the reset changes who is visible at test time; consistency across blocks does not reliably follow. Patches can make inference look autoregressive. They do not reach the product.
+
+We are still far from that native path. What is missing is not one more distillation stage, and not another sweep of the window. It is that the variables visible in pretraining were never \(v_{<t}\). Language settled this at pretraining: the fit is \(\prod_i p(w_i\mid w_{<i})\), and later abilities — long context, tools, reasoning — grew on that product. Video left the same factorization in 2021 for quality on short clips, and won for a few years. When the product being shipped became a stream, the field did not return to the product. It imitated it with a causal mask, a short integral, and a search over the window.
+
+Language models have moved quickly these years, not because they first made the next sentence look right and only later forced the model to see the past. They trained next-token prediction from the start, then scaled. If video keeps using “autoregressive” for a pipeline that is bidirectional first and causalized afterwards, the gap with language will only widen. What to learn is not a particular module, but the path itself: pretraining sees only the past that has already occurred, and one forward emits the factor that was claimed. Until then we are still at the door of the native road, and have not gone in.
+
+---
+
 ## References
 
 1. Zhang, S., Li, Y., Zhuang, J., Jin, W., et al. *EchoWM: Open and Enterable Omnimodal World Models.* arXiv:2608.23189, 2026. https://arxiv.org/abs/2608.23189
