@@ -14,7 +14,7 @@ If video wants the same word, the writing is straightforward. For \(V=(v_1,\ldot
 p(V\mid c)=\prod_t p(v_t\mid v_{<t},c_{\le t}).
 \]
 
-\(c_t\) is whatever is already there: text, a first frame, a camera pose, a key press. It can go into the condition. It is not an excuse to look at \(v_{t+12}\), which has not happened yet. By native autoregression I mean two things: pretraining already fits this product, and writing the next step is one network evaluation. Echo-WM-Flash [[1]](https://arxiv.org/abs/2608.23189) is a model we trained in the diffusion-autoregressive stack that is now standard. I use it below to see how far that stack sits from this definition.
+\(c_t\) is whatever is already there: text, a first frame, a camera pose, a key press. It can go into the condition. It is not an excuse to look at \(v_{>t}\), which has not happened yet. By native autoregression I mean two things: pretraining already fits this product, and writing the next step is one network evaluation. Echo-WM-Flash [[1]](https://arxiv.org/abs/2608.23189) is a model we trained in the diffusion-autoregressive stack that is now standard. I use it below to see how far that stack sits from this definition.
 
 ---
 
