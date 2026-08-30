@@ -85,8 +85,8 @@ def toc_html(body: str, zh: bool) -> str:
 
 def fig_see(zh: bool) -> str:
     if zh:
-        note_bi = "短片训练里，写第 5 帧时 1–8 都可以进条件。"
-        note_ar = "流只看见已经发生的过去。写第 5 帧时，6–8 还不存在。"
+        note_bi = "短片训练里写第 5 帧，1–8 都可以进条件。"
+        note_ar = "流只看见已经发生的。写第 5 帧时，6–8 还不存在。"
     else:
         note_bi = "On a short clip, writing frame 5, 1–8 are all legal."
         note_ar = "A stream only admits the past. Writing frame 5, 6–8 do not exist."
