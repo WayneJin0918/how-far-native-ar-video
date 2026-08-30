@@ -17,7 +17,6 @@ PAGES = {
         "title": "How Far We Are From a Native Autoregressive Video Model",
         "lang": "en",
         "date": "31 August 2026",
-        "footer": "A companion note to EchoWM.",
     },
     "zh": {
         "src": SRC / "how_far_native_ar_video.zh.md",
@@ -25,7 +24,6 @@ PAGES = {
         "title": "我们离原生自回归视频模型还有多远",
         "lang": "zh-Hans",
         "date": "2026年8月31日",
-        "footer": "EchoWM 的一篇配套笔记。",
     },
 }
 
@@ -181,7 +179,6 @@ def page_html(cfg: dict, body: str) -> str:
     <p class="date">{html.escape(cfg["date"])}</p>
     <h1>{html.escape(cfg["title"])}</h1>
     {body}
-    <footer>{cfg["footer"]}</footer>
   </article>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>

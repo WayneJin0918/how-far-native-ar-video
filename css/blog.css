@@ -97,14 +97,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-si
 .refs li { margin: 0.4rem 0; }
 .refs a { word-break: break-all; }
 
-footer {
-  margin-top: 2.8rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 14px;
-}
-
 @media (max-width: 820px) {
   .code-pair { grid-template-columns: 1fr; }
   h1 { font-size: 1.65rem; }
