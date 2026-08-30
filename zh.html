@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blog.css?v=8">
+  <link rel="stylesheet" href="css/blog.css?v=9">
 </head>
 <body>
   <div class="shell">
@@ -42,7 +42,7 @@ p(V\mid c)=\prod_t p(v_t\mid v_{&lt;t},c_{\le t}).
 \]</div>
 <p>\(c_t\) 是当时已经有的条件：文本、第一帧、相机位姿、按键。它可以进条件，但不等于可以去看还没发生的 \(v_{&gt;t}\)。这里说的原生自回归有两层意思：预训练拟合的就是这个乘积；写出下一步，网络只跑一次。Echo-WM-Flash <a class="cite" href="#ref-1" data-ext="https://arxiv.org/abs/2608.23189">1</a> 是我们按现在通行的扩散自回归训出来的。下面拿它当例子，看现在这套做法离这个定义还有多远。</p>
 <h2 id="图像没有时间-视频多出来的是-t">图像没有时间；视频多出来的是 \(t\)</h2>
-<p>一张图里，左右是同时存在的。PixelRNN <a class="cite" href="#ref-4">4</a> 把似然写成光栅顺序 \(p(x)=\prod_{h,w}p(x_{hw}\mid x_{&lt;hw})\)，只是给联合分布排个序。这个序是编码约定，不是时间。DiT <a class="cite" href="#ref-12">12</a> 后来把光栅顺序丢掉，在 \((h,w)\) 上做双向注意力，更接近一张照片。一帧里面空间双向，完全可以。</p>
+<p>一张图里，左右是同时存在的。PixelRNN <a class="cite" href="#ref-4">4</a> 把似然写成光栅顺序 \(p(x)=\prod_{h,w}p(x_{hw}\mid x_{&lt;hw})\)，只是给联合分布排个序。这个序是编码约定，不是时间。DiT <a class="cite" href="#ref-12">12</a> 后来把光栅顺序丢掉，在 \((h,w)\) 上做双向注意力，更接近一张照片。一帧里面空间双向，并不妨碍时间上的约束。</p>
 <p>视频多出来的是 \(t\)。Video Pixel Networks <a class="cite" href="#ref-5">5</a> 在像素级就已经把 \(t\) 当序列，而不是把时长 \(T\) 拉成一张更高的图。写 \(v_t\) 的时候，\(v_{t+1}\) 还不存在：不是画面还没画完，是下一帧还没发生。所以同一个似然里，两种顺序的地位不一样：</p>
 <div class="math-block">\[
 p(V)=\prod_t p\bigl(v_t\mid v_{&lt;t}\bigr),\qquad
