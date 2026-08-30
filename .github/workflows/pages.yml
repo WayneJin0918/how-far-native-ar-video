@@ -26,7 +26,7 @@ jobs:
         run: |
           mkdir public
           cp index.html zh.html .nojekyll public/
-          cp -r css public/
+          cp -r css js public/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
