@@ -69,8 +69,38 @@ h1 {
   font-size: 1.85rem;
   line-height: 1.25;
   font-weight: 600;
-  margin: 0 0 1.55rem;
+  margin: 0 0 0.35rem;
 }
+
+.byline {
+  margin: 0 0 1.55rem;
+  color: var(--muted);
+  font: 15px/1.4 "Source Sans 3", system-ui, sans-serif;
+}
+
+.bib {
+  position: relative;
+}
+.bib pre {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  background: var(--code);
+  border-radius: 4px;
+  overflow-x: auto;
+  font: 13px/1.55 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+.bib-copy {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  appearance: none;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: 500 12px/1 "Source Sans 3", system-ui, sans-serif;
+  cursor: pointer;
+}
+.bib-copy:hover { color: var(--ink); }
 
 h2 {
   font-size: 1.28rem;

@@ -10,6 +10,7 @@
     setupCites();
     setupSee();
     setupStack();
+    setupBib();
   });
 })();
 
@@ -80,6 +81,23 @@ function setupSee() {
       });
     });
     setMode(fig.dataset.mode || "bi");
+  });
+}
+
+function setupBib() {
+  document.querySelectorAll(".bib-copy").forEach(function (btn) {
+    const box = btn.closest(".bib");
+    const code = box ? box.querySelector("code") : null;
+    if (!code) return;
+    const done = btn.textContent;
+    btn.addEventListener("click", function () {
+      navigator.clipboard.writeText(code.textContent).then(function () {
+        btn.textContent = "✓";
+        setTimeout(function () {
+          btn.textContent = done;
+        }, 1200);
+      });
+    });
   });
 }
 

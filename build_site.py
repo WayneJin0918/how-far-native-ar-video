@@ -289,13 +289,28 @@ def md_to_html(md: str, zh: bool) -> str:
 def page_html(cfg: dict, body: str) -> str:
     en_on = "on" if cfg["lang"] == "en" else ""
     zh_on = "on" if cfg["lang"].startswith("zh") else ""
+    bibtex = """@misc{jin2026nativear,
+  author       = {Jin, Weiyang},
+  title        = {How Far We Are From a Native Autoregressive Video Model},
+  year         = {2026},
+  month        = aug,
+  institution  = {The University of Hong Kong},
+  howpublished = {Blog post},
+  url          = {https://waynejin0918.github.io/how-far-native-ar-video/},
+}"""
     if cfg["lang"].startswith("zh"):
+        byline = "Weiyang Jin，香港大学"
+        cite_h = "引用"
+        copy_label = "复制"
         credit = (
             '版式参考了 '
             '<a href="https://thinkingmachines.ai/blog/on-policy-distillation/">Thinking Machines Lab</a> '
             "的研究笔记，谨此致谢。"
         )
     else:
+        byline = "Weiyang Jin, The University of Hong Kong"
+        cite_h = "Cite"
+        copy_label = "Copy"
         credit = (
             'Visual style after '
             '<a href="https://thinkingmachines.ai/blog/on-policy-distillation/">Thinking Machines Lab</a>.'
@@ -323,7 +338,13 @@ def page_html(cfg: dict, body: str) -> str:
     </header>
     <article>
       <h1>{html.escape(cfg["title"])}</h1>
+      <p class="byline">{html.escape(byline)}</p>
       {body}
+      <h2 id="cite">{cite_h}</h2>
+      <div class="bib">
+        <button type="button" class="bib-copy" data-copy>{copy_label}</button>
+        <pre><code>{html.escape(bibtex)}</code></pre>
+      </div>
     </article>
     <footer class="credit">{credit}</footer>
   </main>
