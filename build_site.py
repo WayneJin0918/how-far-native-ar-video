@@ -54,14 +54,14 @@ def slugify(title: str) -> str:
 
 TOC_LABEL = {
     "an-image-has-no-time-video-adds-t": "Time in video",
-    "training-sees-the-future-and-the-next-step-is-not-one-forward": "Training and one forward",
+    "training-sees-the-future-and-the-next-step-takes-more-than-one-forward": "Training and one forward",
     "in-our-experience": "What we saw",
     "what-that-means-for-a-native-design": "A native design",
     "conclusion": "Conclusion",
     "references": "References",
     "cite": "Cite",
     "图像没有时间-视频多出来的是-t": "图像与时间",
-    "训练看见了未来-生成一步也不是一次网络计算": "训练与前向",
+    "训练看见了未来-生成下一步也不止一次前向": "训练与前向",
     "过去的经验": "过去的经验",
     "对原生设计意味着什么": "原生设计",
     "结论": "结论",
@@ -356,7 +356,7 @@ def page_html(cfg: dict, body: str) -> str:
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blog.css?v=22">
+  <link rel="stylesheet" href="css/blog.css?v=23">
 </head>
 <body>
   <div class="shell">

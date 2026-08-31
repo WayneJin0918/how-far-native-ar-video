@@ -8,13 +8,13 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blog.css?v=22">
+  <link rel="stylesheet" href="css/blog.css?v=23">
 </head>
 <body>
   <div class="shell">
     <nav class="toc" aria-label="目录"><p class="toc-k">目录</p><ol><li><a href="#top">引言</a></li>
 <li><a href="#图像没有时间-视频多出来的是-t">图像与时间</a></li>
-<li><a href="#训练看见了未来-生成一步也不是一次网络计算">训练与前向</a></li>
+<li><a href="#训练看见了未来-生成下一步也不止一次前向">训练与前向</a></li>
 <li><a href="#过去的经验">过去的经验</a></li>
 <li><a href="#对原生设计意味着什么">原生设计</a></li>
 <li><a href="#结论">结论</a></li>
@@ -78,8 +78,8 @@ q_{\mathrm{AR}}(v_t\mid v_{&lt;t},c_{\le t})=p_{\mathrm{data}}(v_t\mid v_{&lt;t}
 </figure>
 <p>训练时能看见哪些变量，学到的函数就不一样。\(c_t\) 换成文本、图像或位姿，只是条件里多一项，\(V_{\setminus t}\) 不会变成 \(v_{&lt;t}\)。世界模型 <a class="cite" href="#ref-22">22</a>–<a class="cite" href="#ref-25">25</a> 很早就把这个错位露出来了，因为人还在边看边操作。更长的视频、更低延迟的续写，碰到的还是这件事。</p>
 <p>VideoGPT <a class="cite" href="#ref-7">7</a>、TATS <a class="cite" href="#ref-9">9</a> 已经在离散符号上写过 \(\prod_t p(v_t\mid v_{&lt;t})\)。画质后来输给 MaskGIT <a class="cite" href="#ref-8">8</a>、MAGVIT <a class="cite" href="#ref-11">11</a>、Phenaki <a class="cite" href="#ref-10">10</a>，再输给按整段短片训的 DiT 级双向模型。图好看了，「下一帧只看过去」却丢掉了。测试变成流式生成之后，领域没有回到「时间上只看过去」的预训练，问的是已经训好的 \(q_{\mathrm{bi}}\) 怎么改一改，让测试看起来像 \(q_{\mathrm{AR}}\)，后面的流水线就是在做这件事。</p>
-<h2 id="训练看见了未来-生成一步也不是一次网络计算">训练看见了未来，生成一步也不是一次网络计算</h2>
-<p>按这个定义，现在通行的扩散自回归这两条都不成立，训练看见了未来，生成一步也不是只跑一次网络。</p>
+<h2 id="训练看见了未来-生成下一步也不止一次前向">训练看见了未来，生成下一步也不止一次前向</h2>
+<p>按这个定义，现在通行的扩散自回归这两条都不成立，训练看见了未来，生成下一步也不止需要一次前向。</p>
 <p>先看训练。本该是 \(q_{\mathrm{train}}(v_t\mid\cdot)=p_{\mathrm{data}}(v_t\mid v_{&lt;t})\)。如果拟合的是 \(q_{\mathrm{bi}}\)，推理时再加因果 mask（当前块不许看后面的块），只是测试时不让再看训练用过的未来。模型从来没有在「只有过去」这个条件下训练过。</p>
 <p>再看生成。时间切成 \(B_1,\ldots,B_N\) 之后，写成 \(p(B_{1:N})=\prod_i p_\theta(B_i\mid B_{&lt;i})\)。可这一步如果做成</p>
 <div class="math-block">\[
