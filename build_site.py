@@ -150,7 +150,7 @@ def fig_stack(zh: bool) -> str:
     if zh:
         steps = [
             ("预训练", "双向 DiT，整段短片", "学的是 q_bi，不是 p(v_t | v_<t)。"),
-            ("强迫", "块因果 mask，干净历史", "推理时删掉训练用过的未来；历史仍是数据。"),
+            ("因果", "块因果 mask，干净历史", "推理时挡住训练用过的未来；历史仍是数据。"),
             ("短程", "自己滚出来的历史 + DMD", "补 K，也补 teacher forcing；历史仍短。"),
             ("长程", "拼接 + 固定窗口", "补长度。训练条件还是没变。"),
             ("搜索", "窗口多长、要不要重置位置", "改的是 H_i，不是模型参数。"),
@@ -158,7 +158,7 @@ def fig_stack(zh: bool) -> str:
     else:
         steps = [
             ("pretrain", "bidirectional DiT, full short clip", "Fits q_bi, not p(v_t | v_<t)."),
-            ("force", "block-causal mask, clean history", "Deletes at test time variables training used. History is still data."),
+            ("causal", "block-causal mask, clean history", "Hides at test time the future training used. History is still data."),
             ("short", "self-rollout + DMD", "Patches K, and the teacher-forcing gap. History is still short."),
             ("long", "stitch + fixed window", "Patches length. The training condition is unchanged."),
             ("search", "window size, whether to reset position", "Edits H_i. Still not parameters."),
@@ -356,7 +356,7 @@ def page_html(cfg: dict, body: str) -> str:
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blog.css?v=23">
+  <link rel="stylesheet" href="css/blog.css?v=24">
 </head>
 <body>
   <div class="shell">
