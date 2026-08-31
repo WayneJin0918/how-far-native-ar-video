@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blog.css?v=16">
+  <link rel="stylesheet" href="css/blog.css?v=17">
 </head>
 <body>
   <div class="shell">
@@ -144,7 +144,7 @@ q_{\mathrm{infer}}(B_{&lt;i})=p_\theta(B_{&lt;i}).
   </ol>
 </figure>
 <p>Each extra stage adds quantities to tune. If pretraining never used \(v_{&gt;t}\), and the next step is one network evaluation, those stages are unnecessary.</p>
-<p>How long a block should be is not a free choice. If a block is one frame, there is no intra-block motion to integrate, and the leftover steps are only spatial denoising. If a block is near one second, the setup is again a short-clip model with a cache at the block boundary. Three frames are short enough to emit as you go, and still leave room for bidirectional denoising inside the block, which is why that length became common. A native model has to choose the unit at pretraining: one forward per frame, or one forward per block, rather than integrate again over three frames that share a mask.</p>
+<p>How long a block should be is not a free choice. If a block is one frame, there is no intra-block motion to integrate, and the leftover steps are only spatial denoising. If a block is near one second, the setup is again a short-clip model with a cache at the block boundary. Three frames are short enough to emit as you go, and still leave room for bidirectional denoising inside the block, which is why that length became common. A native model has to choose the unit at pretraining: one forward per frame, or one forward per block, without the extra step of integrating again over three frames that share a mask.</p>
 <h2 id="in-our-experience">In our experience</h2>
 <p>We have trained models in this stack. Flash <a class="cite" href="#ref-1">1</a> is one of them. On closed-loop, long-horizon runs, two things kept coming back.</p>
 <p>If post-training optimizes denoising inside a block, the same block \(B_i\) can look better without improving the condition between blocks. \(\prod_t p(v_t\mid v_{&lt;t})\) is that between-block condition. Changing only \(\mathcal{H}_i\) changes who is visible at test time, not the condition fitted in training.</p>

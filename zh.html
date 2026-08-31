@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blog.css?v=16">
+  <link rel="stylesheet" href="css/blog.css?v=17">
 </head>
 <body>
   <div class="shell">
@@ -144,7 +144,7 @@ q_{\mathrm{infer}}(B_{&lt;i})=p_\theta(B_{&lt;i}).
   </ol>
 </figure>
 <p>每一级都多一组要调的量，如果预训练从来没用过 \(v_{&gt;t}\)，下一步又只跑一次网络，这些级就没有必要。</p>
-<p>块该切多长，不能随便定：一块只有一帧，块里没有前后运动，多步积分只剩空间去噪；一块接近一秒，又变回带边界缓存的短片模型；三帧既能边写边出，又给块内双向去噪留了空间，所以成了常见折中。原生模型得在预训练就定下这个单元，可以一帧跑一次网络，也可以一块跑一次网络，不要三帧共用一个 mask 再积分一遍。</p>
+<p>块该切多长，不能随便定：一块只有一帧，块里没有前后运动，多步积分只剩空间去噪；一块接近一秒，又变回带边界缓存的短片模型；三帧既能边写边出，又给块内双向去噪留了空间，所以成了常见折中。原生模型得在预训练就定下这个单元，可以一帧跑一次网络，也可以一块跑一次网络，不用额外让三帧共用一个 mask 再积分一遍。</p>
 <h2 id="过去的经验">过去的经验</h2>
 <p>我们过去训过现在这套扩散自回归，Flash <a class="cite" href="#ref-1">1</a> 是其中之一，闭环、长程往下跑的时候两件事反复出现。</p>
 <p>后训练如果优化的是块内去噪，同一块 \(B_i\) 里可以更好看，但不一定能改善块与块之间的条件，\(\prod_t p(v_t\mid v_{&lt;t})\) 要的就是块与块之间这一层。只改 \(\mathcal{H}_i\)，改的是测试时看见谁，训练时拟合的条件没动。</p>

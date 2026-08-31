@@ -96,7 +96,7 @@ pretrain  bidirectional DiT, full short clip  # learns q_bi
 
 Each extra stage adds quantities to tune. If pretraining never used \(v_{>t}\), and the next step is one network evaluation, those stages are unnecessary.
 
-How long a block should be is not a free choice. If a block is one frame, there is no intra-block motion to integrate, and the leftover steps are only spatial denoising. If a block is near one second, the setup is again a short-clip model with a cache at the block boundary. Three frames are short enough to emit as you go, and still leave room for bidirectional denoising inside the block, which is why that length became common. A native model has to choose the unit at pretraining: one forward per frame, or one forward per block, rather than integrate again over three frames that share a mask.
+How long a block should be is not a free choice. If a block is one frame, there is no intra-block motion to integrate, and the leftover steps are only spatial denoising. If a block is near one second, the setup is again a short-clip model with a cache at the block boundary. Three frames are short enough to emit as you go, and still leave room for bidirectional denoising inside the block, which is why that length became common. A native model has to choose the unit at pretraining: one forward per frame, or one forward per block, without the extra step of integrating again over three frames that share a mask.
 
 ---
 
