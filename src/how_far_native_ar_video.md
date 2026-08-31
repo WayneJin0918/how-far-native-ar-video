@@ -14,7 +14,7 @@ If video uses the same word, write, for \(V=(v_1,\ldots,v_T)\),
 p(V\mid c)=\prod_t p(v_t\mid v_{<t},c_{\le t}).
 \]
 
-\(c_t\) is a condition that is already there: text, a first frame, a camera pose, a key press. It can go into the condition. It does not let the model look at \(v_{>t}\), which has not happened yet. Here, native autoregression means two things: pretraining already fits this product, and writing the next step is one network evaluation. Echo-WM-Flash [[1]](https://arxiv.org/abs/2608.23189) is one model we trained in the diffusion-autoregressive stack that is now standard. The rest of this note is about how far that stack is from this definition.
+\(c_t\) is a condition that is already there: text, a first frame, a camera pose, a key press. It can go into the condition. It does not let the model look at \(v_{>t}\), which has not happened yet. Here, native autoregression means two things. Pretraining already fits this product. Writing the next step is one network evaluation. Echo-WM-Flash [[1]](https://arxiv.org/abs/2608.23189) is one model we trained in the diffusion-autoregressive stack that is now standard. The rest of this note is about how far that stack is from this definition.
 
 ---
 
@@ -143,9 +143,9 @@ Leaving VideoGPT’s temporal factorization in 2021 made sense. The goal then wa
 
 ## Conclusion
 
-Native autoregression is two things: pretraining fits \(p(v_t\mid v_{<t},c_{\le t})\), and writing the next step is one network evaluation. The stack now in use satisfies neither. Patching afterwards does not get there. An intra-block loss cleans the same block. A longer window or a reset changes who is visible at test time. Neither supplies \(p(v_t\mid v_{<t})\).
+Native autoregression is two things. Pretraining fits \(p(v_t\mid v_{<t},c_{\le t})\). Writing the next step is one network evaluation. The stack now in use satisfies neither. Patching afterwards does not get there either. An intra-block loss only cleans the same block, and a longer window or a reset only changes who is visible at test time. Neither reaches \(p(v_t\mid v_{<t})\).
 
-Language models have moved quickly because they trained next-token prediction from the start, then scaled. Video left the same factorization in 2021, and later imitated it with a causal mask, a short integral, and a search over the window. Catching up means changing, at pretraining, which variables training may see. Another distillation stage will not do it. Until that change is made, we are still far from a native autoregressive video model.
+Language models have moved quickly because they trained next-token prediction from the start, then scaled. Video left the same factorization in 2021, and later imitated it with a causal mask, a short integral, and a search over the window. Catching up means changing, at pretraining, which variables training may see. Another distillation stage will not supply those two conditions. Until that change is made, we are still far from a native autoregressive video model.
 
 ---
 

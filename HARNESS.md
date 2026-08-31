@@ -27,14 +27,15 @@ Do not write:
 - unexplained numbers, punchy metaphors (借口 / 戴上 mask / 赢的就是这一块 / 站在门口)
 - 本文 / this paper. This is a note. 这里 / in this note / we.
 - a conclusion that retells the whole essay. Restate the two conditions, that later patches do not reach them, and what has to change at pretraining. Do not make unpublished Flash runs the scope of “native.”
-- telegram closers: a colon after 说得通 / 仍然是 that dumps the rest of the argument; stacked punches like 「现在要测的是流。」「还能做的，是…」「口头上的「X」仍然是：」「要的是短片段，Y 在那上面是对的」. If a sentence is only a label plus a formula, write the reason in the same breath.
+- telegram closers: a colon after 说得通 / 仍然是 / 两件事 that dumps the rest of the argument; stacked punches like 「现在要测的是流。」「事后再补也到不了。」「块内损失让同一块更好看。」. If a sentence is only a label plus a formula, write the reason in the same breath.
+- broken 语序 / 断句: 「X 是两件事：A，B」should be two sentences. Put a pause before 「两条都不成立」. Do not stack four or more one-clause punches; join the patches to the claim they fail.
 
 TML is a **style** reference: calm we-voice, claim then why, one analogy at most. It is not a layout to copy (no hero, no sentence-tree cards).
 
 ## The loop (do it, do not skip)
 
 1. **Read aloud once** in the language you edited. Mark any sentence you would not say to a colleague.
-2. **Logic pass.** Every 所以 / 于是 / so / therefore must follow from the previous sentence. If the dash or colon hides two claims, split them. A colon after 说得通 / 仍然是 / 要的是 is almost always two claims.
+2. **Logic pass.** Every 所以 / 于是 / so / therefore must follow from the previous sentence. If the dash or colon hides two claims, split them. A colon after 说得通 / 仍然是 / 要的是 / 两件事 is almost always two claims. If 两者 / 这两条 has no nearby noun, the break is wrong.
 3. **Leftover-AI pass.** Search for: 只有…才, 不是 A 而是 B, 因子, 借口, 回路, 门口, 本文, 第一组, 第二组, 实验里, 该赢, 否定原生, 还能做的，是, 口头上的, 要测的是, 在那上面是对的, *first experiment*, *second experiment*, *supposed to win*, *what remains is*, *the test now is*, *collapses to*, *what to learn is not*, *misses both ends*, *the intuition is not hard*.
 4. **Align, do not translate.** After Chinese changes, fix the matching English claim — same thought, not the same syntax.
 5. **Rebuild.** `python3 build_site.py` from the blog root. Check that KaTeX still has \(v_{>t}\) and \(w_{<i}\).
