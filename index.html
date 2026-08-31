@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blog.css?v=20">
+  <link rel="stylesheet" href="css/blog.css?v=21">
 </head>
 <body>
   <div class="shell">
@@ -79,7 +79,7 @@ q_{\mathrm{AR}}(v_t\mid v_{&lt;t},c_{\le t})=p_{\mathrm{data}}(v_t\mid v_{&lt;t}
 <p>Which variables training can see determines which function is learned. Swapping text, an image, or a pose for \(c_t\) adds one more term in the condition. It does not turn \(V_{\setminus t}\) into \(v_{&lt;t}\). World models <a class="cite" href="#ref-22">22</a>–<a class="cite" href="#ref-25">25</a> made the mismatch visible early, because a person is still acting in the world. Longer video and low-latency continuation run into the same mismatch.</p>
 <p>VideoGPT <a class="cite" href="#ref-7">7</a> and TATS <a class="cite" href="#ref-9">9</a> already wrote \(\prod_t p(v_t\mid v_{&lt;t})\) over discrete symbols. Quality later lost out to MaskGIT <a class="cite" href="#ref-8">8</a>, MAGVIT <a class="cite" href="#ref-11">11</a>, Phenaki <a class="cite" href="#ref-10">10</a>, then to bidirectional models trained on short clips at DiT scale. Pictures improved; the temporal factorization was dropped. When the test became streaming generation, the field did not return to pretraining that sees only the past in time. It asked how to reshape an existing \(q_{\mathrm{bi}}\) so the test looks like \(q_{\mathrm{AR}}\). The pipeline that followed is doing that work.</p>
 <h2 id="training-sees-the-future-and-the-next-step-is-not-one-forward">Training sees the future, and the next step is not one forward</h2>
-<p>By that definition, the diffusion-autoregressive stack now in use satisfies neither condition. Training sees the future. Each step, as written, is not one network evaluation.</p>
+<p>By that definition, the diffusion-autoregressive stack now in use satisfies neither condition. Training sees the future. Generating one step is not one network evaluation.</p>
 <p>Start with training. It should be \(q_{\mathrm{train}}(v_t\mid\cdot)=p_{\mathrm{data}}(v_t\mid v_{&lt;t})\). If the fit is \(q_{\mathrm{bi}}\), a causal mask at inference (the current block may not see later blocks) only removes at test time the variables training used. The model was never trained under “past only.”</p>
 <p>Then generation. After cutting time into \(B_1,\ldots,B_N\), the claimed factorization is \(p(B_{1:N})=\prod_i p_\theta(B_i\mid B_{&lt;i})\). If that step is implemented as</p>
 <div class="math-block">\[

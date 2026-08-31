@@ -49,7 +49,7 @@ VideoGPT [7] and TATS [9] already wrote \(\prod_t p(v_t\mid v_{<t})\) over discr
 
 ## Training sees the future, and the next step is not one forward
 
-By that definition, the diffusion-autoregressive stack now in use satisfies neither condition. Training sees the future. Each step, as written, is not one network evaluation.
+By that definition, the diffusion-autoregressive stack now in use satisfies neither condition. Training sees the future. Generating one step is not one network evaluation.
 
 Start with training. It should be \(q_{\mathrm{train}}(v_t\mid\cdot)=p_{\mathrm{data}}(v_t\mid v_{<t})\). If the fit is \(q_{\mathrm{bi}}\), a causal mask at inference (the current block may not see later blocks) only removes at test time the variables training used. The model was never trained under “past only.”
 
