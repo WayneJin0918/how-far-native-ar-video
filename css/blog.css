@@ -139,8 +139,13 @@ article { min-width: 0; }
 article p {
   text-align: justify;
   text-align-last: start;
-  text-justify: inter-ideograph;
   hyphens: auto;
+}
+
+html[lang="zh-Hans"] article p {
+  text-justify: inter-character;
+  line-break: loose;
+  word-break: break-word;
 }
 
 article .byline,
@@ -148,6 +153,8 @@ article .see-note {
   text-align: start;
   text-justify: auto;
   hyphens: none;
+  line-break: auto;
+  word-break: normal;
 }
 
 h2 {
