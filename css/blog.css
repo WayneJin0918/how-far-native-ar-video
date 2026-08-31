@@ -139,7 +139,14 @@ article { min-width: 0; }
 article p {
   text-align: justify;
   text-align-last: start;
+}
+
+html[lang="en"] article p {
+  text-justify: inter-word;
   hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphenate-limit-chars: 6 3 2;
+  overflow-wrap: break-word;
 }
 
 html[lang="zh-Hans"] article p {
@@ -153,6 +160,7 @@ article .see-note {
   text-align: start;
   text-justify: auto;
   hyphens: none;
+  -webkit-hyphens: none;
   line-break: auto;
   word-break: normal;
 }
