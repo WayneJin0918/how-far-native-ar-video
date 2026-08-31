@@ -86,10 +86,10 @@ def toc_html(body: str, zh: bool) -> str:
 def fig_see(zh: bool) -> str:
     if zh:
         note_bi = "短片训练里写第 5 帧，1–8 都可以进条件。"
-        note_ar = "流只看见已经发生的。写第 5 帧时，6–8 还不存在。"
+        note_ar = "流式生成只看见已经发生的。写第 5 帧时，6–8 还不存在。"
     else:
         note_bi = "On a short clip, writing frame 5, 1–8 are all legal."
-        note_ar = "A stream only admits the past. Writing frame 5, 6–8 do not exist."
+        note_ar = "Streaming generation only admits the past. Writing frame 5, 6–8 do not exist."
 
     cells = []
     for i in range(1, 9):
@@ -356,7 +356,7 @@ def page_html(cfg: dict, body: str) -> str:
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blog.css?v=18">
+  <link rel="stylesheet" href="css/blog.css?v=19">
 </head>
 <body>
   <div class="shell">

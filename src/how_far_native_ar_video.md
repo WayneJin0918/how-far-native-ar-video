@@ -35,7 +35,7 @@ The product on the left comes from time: later frames do not exist yet. Bidirect
 q_{\mathrm{bi}}(v_t\mid V_{\setminus t},c).
 \]
 
-Once the test is a stream, the required condition changes. That includes continuation, a \(c_t\) that arrives as you go, and a horizon longer than the window seen in training. What is needed then is
+Once the test is streaming generation, the required condition changes. That includes continuation, a \(c_t\) that arrives as you go, and a horizon longer than the window seen in training. What is needed then is
 
 \[
 q_{\mathrm{AR}}(v_t\mid v_{<t},c_{\le t})=p_{\mathrm{data}}(v_t\mid v_{<t},c_{\le t}).
@@ -43,7 +43,7 @@ q_{\mathrm{AR}}(v_t\mid v_{<t},c_{\le t})=p_{\mathrm{data}}(v_t\mid v_{<t},c_{\l
 
 Which variables training can see determines which function is learned. Swapping text, an image, or a pose for \(c_t\) adds one more term in the condition. It does not turn \(V_{\setminus t}\) into \(v_{<t}\). World models [22]–[25] made the mismatch visible early, because a person is still acting in the world. Longer video and low-latency continuation run into the same mismatch.
 
-VideoGPT [7] and TATS [9] already wrote \(\prod_t p(v_t\mid v_{<t})\) over discrete symbols. Quality later lost out to MaskGIT [8], MAGVIT [11], Phenaki [10], then to bidirectional models trained on short clips at DiT scale. Pictures improved; the temporal factorization was dropped. When generation became a stream, the field did not return to pretraining that sees only the past in time. It asked how to reshape an existing \(q_{\mathrm{bi}}\) so the test looks like \(q_{\mathrm{AR}}\). The pipeline that followed is doing that work.
+VideoGPT [7] and TATS [9] already wrote \(\prod_t p(v_t\mid v_{<t})\) over discrete symbols. Quality later lost out to MaskGIT [8], MAGVIT [11], Phenaki [10], then to bidirectional models trained on short clips at DiT scale. Pictures improved; the temporal factorization was dropped. When the test became streaming generation, the field did not return to pretraining that sees only the past in time. It asked how to reshape an existing \(q_{\mathrm{bi}}\) so the test looks like \(q_{\mathrm{AR}}\). The pipeline that followed is doing that work.
 
 ---
 
@@ -137,7 +137,7 @@ with \(\sigma\) applied only to the current unit and no gradient through \(v_{>t
 
 A few questions are still open, and they are worth asking before another window sweep. For a large bidirectional video backbone, how long does continued pretraining that is causal in time take to wash out the habits of \(q_{\mathrm{bi}}\), and is a re-initialization required? Is \(K=1\) stable in a continuous latent space, or is a stronger discrete or hybrid codebook needed? Under a native objective, which of one frame per forward and three frames per forward keeps both motion and latency? Should a learned \(\mathcal{H}_i\) receive a signal from consistency across blocks directly? Searching \(\mathcal{H}_i\) without that signal does not change the factorization the model learned.
 
-Leaving VideoGPT’s temporal factorization in 2021 made sense. The goal then was a short clip, and \(q_{\mathrm{bi}}\) is the right model for that length. The test has become a stream. Train a bidirectional clip, then post-train, then search \(\mathcal{H}_i\) at inference, and you still do not have \(p(v_t\mid v_{<t})\). The next step is to change, at pretraining, which variables training may see. Until that change, what is now called “autoregressive video” is still denoise a whole short clip, then at inference make it see only the past.
+Leaving VideoGPT’s temporal factorization in 2021 made sense. The goal then was a short clip, and \(q_{\mathrm{bi}}\) is the right model for that length. The test has become streaming generation. Train a bidirectional clip, then post-train, then search \(\mathcal{H}_i\) at inference, and you still do not have \(p(v_t\mid v_{<t})\). The next step is to change, at pretraining, which variables training may see. Until that change, what is now called “autoregressive video” is still denoise a whole short clip, then at inference make it see only the past.
 
 ---
 
