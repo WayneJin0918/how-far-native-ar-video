@@ -136,6 +136,20 @@ h1 {
 
 article { min-width: 0; }
 
+article p {
+  text-align: justify;
+  text-align-last: start;
+  text-justify: inter-ideograph;
+  hyphens: auto;
+}
+
+article .byline,
+article .see-note {
+  text-align: start;
+  text-justify: auto;
+  hyphens: none;
+}
+
 h2 {
   font-size: 1.3rem;
   line-height: 1.3;
