@@ -6,7 +6,7 @@ In language, the meaning of autoregression has been clear for a long time. Pretr
 p(w_{1:n})=\prod_i p(w_i\mid w_{<i}),
 \]
 
-and each next word is one network evaluation. Training and test both see words already written. Nobody pretrains a bidirectional BERT [6], distills a student that “looks like GPT,” and calls that native. A causal mask at inference does not make it native either.
+and each next word takes one forward. Training and test both see words already written. Nobody pretrains a bidirectional BERT [6], distills a student that “looks like GPT,” and calls that native. A causal mask at inference does not make it native either.
 
 If video uses the same word, the analogue for \(V=(v_1,\ldots,v_T)\) is
 
@@ -14,7 +14,7 @@ If video uses the same word, the analogue for \(V=(v_1,\ldots,v_T)\) is
 p(V\mid c)=\prod_t p(v_t\mid v_{<t},c_{\le t}).
 \]
 
-\(c_t\) is a condition that is already there: text, a first frame, a camera pose, a key press. It can go into the condition. It does not let the model look at \(v_{>t}\), which has not happened yet. Here, native autoregression means two things: pretraining already fits this product, and writing the next step is one network evaluation. Echo-WM-Flash [[1]](https://arxiv.org/abs/2608.23189) is one model we trained in the diffusion-autoregressive stack that is now standard. The rest of this note is about how far that stack is from this definition.
+\(c_t\) is a condition that is already there: text, a first frame, a camera pose, a key press. It can go into the condition. It does not let the model look at \(v_{>t}\), which has not happened yet. Here, native autoregression means two things: pretraining already fits this product, and writing the next step takes one forward. Echo-WM-Flash [[1]](https://arxiv.org/abs/2608.23189) is one model we trained in the diffusion-autoregressive stack that is now standard. The rest of this note is about how far that stack is from this definition.
 
 ---
 
@@ -94,7 +94,7 @@ pretrain  bidirectional DiT, full short clip  # learns q_bi
 → search  window size, whether to reset pos.  # patch H_i; still not parameters
 ```
 
-Each extra stage adds quantities to tune. If pretraining never used \(v_{>t}\), and the next step is one network evaluation, those stages are unnecessary.
+Each extra stage adds quantities to tune. If pretraining never used \(v_{>t}\), and the next step takes one forward, those stages are unnecessary.
 
 How long a block should be is not a free choice. If a block is one frame, there is no intra-block motion to integrate, and the leftover steps are only spatial denoising. If a block is near one second, the setup is again a short-clip model with a cache at the block boundary. Three frames are short enough to emit as you go, and still leave room for bidirectional denoising inside the block, which is why that length became common. A native model has to choose the unit at pretraining: one forward per frame, or one forward per block, without the extra step of integrating again over three frames that share a mask.
 
@@ -114,7 +114,7 @@ When we held the generator fixed and changed only \(\mathcal{H}_i\) — a longer
 
 ## What that means for a native design
 
-Intra-block post-training, and changing the window or the reset at inference, do not reach the goal of fitting \(p(v_t\mid v_{<t})\). If pretraining is to fit \(p(v_t\mid v_{<t},c_{\le t})\) and the next step is one network evaluation, a few things are already fixed.
+Intra-block post-training, and changing the window or the reset at inference, do not reach the goal of fitting \(p(v_t\mid v_{<t})\). If pretraining is to fit \(p(v_t\mid v_{<t},c_{\le t})\) and the next step takes one forward, a few things are already fixed.
 
 **Post-training inside a block does not supply the condition between blocks.** An intra-block loss spends capacity on how \(B_i\) looks. To learn \(\prod_t p(v_t\mid v_{<t})\), the pretraining condition has to be the past. Another distillation stage with cleaner texture does not supply that condition. Continued pretraining of an already bidirectional DiT can keep the initialization, but the future in time has to be invisible from the first step. A cleaner path keeps the same latent space and the same bidirectionality inside a frame, and makes the time mask causal from random initialization. VideoGPT [7] already wrote next-frame-from-the-past; the discrete codebook was weak. What is missing is the same path on a DiT and a current video VAE [12][15][16]. The loss can remain flow matching; the condition changes:
 
@@ -143,7 +143,7 @@ Leaving VideoGPT’s next-frame-from-the-past in 2021 made sense, because the go
 
 ## Conclusion
 
-Native autoregression is two things: pretraining fits \(p(v_t\mid v_{<t},c_{\le t})\), and writing the next step is one network evaluation. The stack now in use satisfies neither. Patching afterwards does not get there either. An intra-block loss only cleans the same block, and a longer window or a reset only changes which frames are visible at test time. Neither reaches the goal of fitting \(p(v_t\mid v_{<t})\).
+Native autoregression is two things: pretraining fits \(p(v_t\mid v_{<t},c_{\le t})\), and writing the next step takes one forward. The stack now in use satisfies neither. Patching afterwards does not get there either. An intra-block loss only cleans the same block, and a longer window or a reset only changes which frames are visible at test time. Neither reaches the goal of fitting \(p(v_t\mid v_{<t})\).
 
 Language models have moved quickly because they trained next-token prediction from the start, then scaled. Video left next-frame-from-the-past in 2021, and later imitated it with a causal mask, a short integral, and a search over the window. Catching up means changing, at pretraining, which variables training may see. Another distillation stage will not supply those two conditions. Until that change is made, we are still far from a native autoregressive video model.
 
