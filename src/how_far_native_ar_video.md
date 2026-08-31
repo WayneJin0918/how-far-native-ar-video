@@ -114,7 +114,7 @@ When we held the generator fixed and changed only \(\mathcal{H}_i\) — a longer
 
 ## What that means for a native design
 
-Intra-block post-training, and changing the window or the reset at inference, do not reach \(p(v_t\mid v_{<t})\). If pretraining is to fit \(p(v_t\mid v_{<t},c_{\le t})\) and the next step is one network evaluation, a few things are already fixed.
+Intra-block post-training, and changing the window or the reset at inference, do not reach the goal of fitting \(p(v_t\mid v_{<t})\). If pretraining is to fit \(p(v_t\mid v_{<t},c_{\le t})\) and the next step is one network evaluation, a few things are already fixed.
 
 **Post-training inside a block does not supply the condition between blocks.** An intra-block loss spends capacity on how \(B_i\) looks. To learn \(\prod_t p(v_t\mid v_{<t})\), the pretraining condition has to be the past. Another distillation stage with cleaner texture does not supply that condition. Continued pretraining of an already bidirectional DiT can keep the initialization, but the future in time has to be invisible from the first step. A cleaner path keeps the same latent space and the same bidirectionality inside a frame, and makes the time mask causal from random initialization. VideoGPT [7] wrote this factorization; the discrete codebook was weak. What is missing is that factorization on a DiT and a current video VAE [12][15][16]. The loss can remain flow matching; the condition changes:
 
@@ -137,13 +137,13 @@ with \(\sigma\) applied only to the current unit and no gradient through \(v_{>t
 
 A few questions are still open, and they are worth asking before another window sweep. For a large bidirectional video backbone, how long does continued pretraining that is causal in time take to wash out the habits of \(q_{\mathrm{bi}}\), and is a re-initialization required? Is \(K=1\) stable in a continuous latent space, or is a stronger discrete or hybrid codebook needed? Under a native objective, which of one frame per forward and three frames per forward keeps both motion and latency? Should a learned \(\mathcal{H}_i\) receive a signal from consistency across blocks directly? Searching \(\mathcal{H}_i\) without that signal does not change the factorization the model learned.
 
-Leaving VideoGPT’s temporal factorization in 2021 made sense. The goal then was a short clip, and \(q_{\mathrm{bi}}\) is the right model for that length. The test has become streaming generation. Train a bidirectional clip, then post-train, then search \(\mathcal{H}_i\) at inference, and you still do not have \(p(v_t\mid v_{<t})\). The next step is to change, at pretraining, which variables training may see. Until that change, what is now called “autoregressive video” is still denoise a whole short clip, then at inference make it see only the past.
+Leaving VideoGPT’s temporal factorization in 2021 made sense. The goal then was a short clip, and \(q_{\mathrm{bi}}\) is the right model for that length. The test has become streaming generation. Train a bidirectional clip, then post-train, then search \(\mathcal{H}_i\) at inference, and you still do not reach the goal of fitting \(p(v_t\mid v_{<t})\). The next step is to change, at pretraining, which variables training may see. Until that change, what is now called “autoregressive video” is still denoise a whole short clip, then at inference make it see only the past.
 
 ---
 
 ## Conclusion
 
-Native autoregression is two things. Pretraining fits \(p(v_t\mid v_{<t},c_{\le t})\). Writing the next step is one network evaluation. The stack now in use satisfies neither. Patching afterwards does not get there either. An intra-block loss only cleans the same block, and a longer window or a reset only changes who is visible at test time. Neither reaches \(p(v_t\mid v_{<t})\).
+Native autoregression is two things. Pretraining fits \(p(v_t\mid v_{<t},c_{\le t})\). Writing the next step is one network evaluation. The stack now in use satisfies neither. Patching afterwards does not get there either. An intra-block loss only cleans the same block, and a longer window or a reset only changes who is visible at test time. Neither reaches the goal of fitting \(p(v_t\mid v_{<t})\).
 
 Language models have moved quickly because they trained next-token prediction from the start, then scaled. Video left the same factorization in 2021, and later imitated it with a causal mask, a short integral, and a search over the window. Catching up means changing, at pretraining, which variables training may see. Another distillation stage will not supply those two conditions. Until that change is made, we are still far from a native autoregressive video model.
 
