@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blog.css?v=21">
+  <link rel="stylesheet" href="css/blog.css?v=22">
 </head>
 <body>
   <div class="shell">
@@ -77,11 +77,11 @@ q_{\mathrm{AR}}(v_t\mid v_{&lt;t},c_{\le t})=p_{\mathrm{data}}(v_t\mid v_{&lt;t}
   <p class="see-note">短片训练里写第 5 帧，1–8 都可以进条件。</p>
 </figure>
 <p>训练时能看见哪些变量，学到的函数就不一样。\(c_t\) 换成文本、图像或位姿，只是条件里多一项，\(V_{\setminus t}\) 不会变成 \(v_{&lt;t}\)。世界模型 <a class="cite" href="#ref-22">22</a>–<a class="cite" href="#ref-25">25</a> 很早就把这个错位露出来了，因为人还在边看边操作。更长的视频、更低延迟的续写，碰到的还是这件事。</p>
-<p>VideoGPT <a class="cite" href="#ref-7">7</a>、TATS <a class="cite" href="#ref-9">9</a> 已经在离散符号上写过 \(\prod_t p(v_t\mid v_{&lt;t})\)。画质后来输给 MaskGIT <a class="cite" href="#ref-8">8</a>、MAGVIT <a class="cite" href="#ref-11">11</a>、Phenaki <a class="cite" href="#ref-10">10</a>，再输给按整段短片训的 DiT 级双向模型。图好看了，时间上的分解却丢掉了。测试变成流式生成之后，领域没有回到「时间上只看过去」的预训练，问的是已经训好的 \(q_{\mathrm{bi}}\) 怎么改一改，让测试看起来像 \(q_{\mathrm{AR}}\)，后面的流水线就是在做这件事。</p>
+<p>VideoGPT <a class="cite" href="#ref-7">7</a>、TATS <a class="cite" href="#ref-9">9</a> 已经在离散符号上写过 \(\prod_t p(v_t\mid v_{&lt;t})\)。画质后来输给 MaskGIT <a class="cite" href="#ref-8">8</a>、MAGVIT <a class="cite" href="#ref-11">11</a>、Phenaki <a class="cite" href="#ref-10">10</a>，再输给按整段短片训的 DiT 级双向模型。图好看了，「下一帧只看过去」却丢掉了。测试变成流式生成之后，领域没有回到「时间上只看过去」的预训练，问的是已经训好的 \(q_{\mathrm{bi}}\) 怎么改一改，让测试看起来像 \(q_{\mathrm{AR}}\)，后面的流水线就是在做这件事。</p>
 <h2 id="训练看见了未来-生成一步也不是一次网络计算">训练看见了未来，生成一步也不是一次网络计算</h2>
 <p>按这个定义，现在通行的扩散自回归这两条都不成立，训练看见了未来，生成一步也不是只跑一次网络。</p>
 <p>先看训练。本该是 \(q_{\mathrm{train}}(v_t\mid\cdot)=p_{\mathrm{data}}(v_t\mid v_{&lt;t})\)。如果拟合的是 \(q_{\mathrm{bi}}\)，推理时再加因果 mask（当前块不许看后面的块），只是测试时不让再看训练用过的未来。模型从来没有在「只有过去」这个条件下训练过。</p>
-<p>再看生成。时间切成 \(B_1,\ldots,B_N\) 之后，分解写成 \(p(B_{1:N})=\prod_i p_\theta(B_i\mid B_{&lt;i})\)。可这一步如果做成</p>
+<p>再看生成。时间切成 \(B_1,\ldots,B_N\) 之后，写成 \(p(B_{1:N})=\prod_i p_\theta(B_i\mid B_{&lt;i})\)。可这一步如果做成</p>
 <div class="math-block">\[
 x_{\sigma_K}\sim\mathcal{N}(0,I),\quad
 x_{\sigma_k}=x_{\sigma_{k+1}}+(\sigma_k-\sigma_{k+1})\,v_\theta(x_{\sigma_{k+1}},\sigma_{k+1}\mid B_{&lt;i},B_i^{\mathrm{noisy}}),
@@ -155,7 +155,7 @@ q_{\mathrm{infer}}(B_{&lt;i})=p_\theta(B_{&lt;i}).
 <p>生成器不动，只改 \(\mathcal{H}_i\)，加长推理窗口，或者打开、关掉位置和位姿编码的重置，训练条件都没变。窗口和训练对不上，偏差出在块与块的接缝；重置和训练对不上，相对位置编码会指向另一套几何。跨块一致性没有因此稳定变好，变的仍是测试时看见谁，并没有学到 \(p(v_t\mid v_{&lt;t})\)。</p>
 <h2 id="对原生设计意味着什么">对原生设计意味着什么</h2>
 <p>块内后训练，推理时改窗口、开关重置，都到不了拟合 \(p(v_t\mid v_{&lt;t})\) 的目标。如果预训练就要拟合 \(p(v_t\mid v_{&lt;t},c_{\le t})\)，下一步又只跑一次网络，后面几件事其实已经定了。</p>
-<p><strong>块内后训练补不上跨块条件。</strong> 块内损失会把能力花在 \(B_i\) 好不好看上，要把 \(\prod_t p(v_t\mid v_{&lt;t})\) 学到，预训练的条件就得是过去，再加一个更好看的蒸馏阶段也补不上这个条件。继续预训练一条已经双向的 DiT，初始化可以留，但时间上的未来必须从第一步起就看不见。更干净的做法是隐空间还是那一套，帧内仍双向，时间 mask 从随机初始化就是因果的。VideoGPT <a class="cite" href="#ref-7">7</a> 写过这个分解，离散码本偏弱，缺的是把它落到 DiT 和现在的视频 VAE 上 <a class="cite" href="#ref-12">12</a> <a class="cite" href="#ref-15">15</a> <a class="cite" href="#ref-16">16</a>。损失可以还是流匹配，改的是条件：</p>
+<p><strong>块内后训练补不上跨块条件。</strong> 块内损失会把能力花在 \(B_i\) 好不好看上，要把 \(\prod_t p(v_t\mid v_{&lt;t})\) 学到，预训练的条件就得是过去，再加一个更好看的蒸馏阶段也补不上这个条件。继续预训练一条已经双向的 DiT，初始化可以留，但时间上的未来必须从第一步起就看不见。更干净的做法是隐空间还是那一套，帧内仍双向，时间 mask 从随机初始化就是因果的。VideoGPT <a class="cite" href="#ref-7">7</a> 写过「下一帧只看过去」，离散码本偏弱，缺的是把它落到 DiT 和现在的视频 VAE 上 <a class="cite" href="#ref-12">12</a> <a class="cite" href="#ref-15">15</a> <a class="cite" href="#ref-16">16</a>。损失可以还是流匹配，改的是条件：</p>
 <div class="math-block">\[
 \mathcal{L}
 =\mathbb{E}_{t,\sigma}\bigl\|
@@ -167,11 +167,11 @@ v_\theta(x_{\sigma,t},\sigma\mid v_{&lt;t},c_{\le t})
 <p><strong>时间单元在预训练定下来，测试时不再对块内积分。</strong> 块内去噪可以更好看，网络却还绑在 \(K\) 步向量场上，如果说一块（或一帧）就是一步，测试时就不能再对这块做 \(K\) 步积分。一次网络计算写一帧，最接近语言里的一个词；一次网络计算写 \(L&gt;1\) 帧，块内可以双向，每次吐出的片段更长。两种都可以，但 \(L\) 不能再当推理超参，改 \(L\) 就是改这一步有多长，块长如果还留给测试时折中，就会回到三帧加一段微分方程，后训练会再去优化这段方程。</p>
 <p><strong>评价要看跨块，不能只看块内干不干净。</strong> 块内更干净，并不等于跨块更一致，只看短片段和块内指标来停训，还会把这两件事当成一回事。用同一套权重，生成时只跑一次网络，从第一秒开始量，一直量到超过训练窗口，\(c_t\) 中途变了，再看条件是不是仍只依赖 \(v_{&lt;t}\)。几秒的短片上双向模型更好看并不奇怪，那段长度上训练本来就看得见未来，短片上的观感说明不了原生走不走得通。</p>
 <p><strong>数据也要按「过去已经发生」来切。</strong> 等长短片把未来帧当成现成的特征。\(q_{\mathrm{AR}}\) 要求数据里的过去也是已经发生的过去：更长的连续镜头、带时间戳的 \(c_t\)、中途才出现的条件。不改训练条件，跨块一致性上不来，只改 \(\mathcal{H}_i\) 的时候我们见过这件事。</p>
-<p>还有几个问题没有答案，最好在再调窗口之前先想清楚。已经双向的大规模视频骨干，只做时间因果的继续预训练，要多久才能去掉 \(q_{\mathrm{bi}}\) 留下的习惯，要不要重新初始化？连续隐空间上 \(K=1\) 稳不稳，还是需要更强的离散或混合码本？原生目标下，一帧跑一次网络和三帧跑一次网络，哪一个更能同时保住运动和延迟？学出来的 \(\mathcal{H}_i\) 要不要直接接收跨块一致性的信号？没有这条信号的窗口搜索，并不改变模型学到的分解。</p>
-<p>2021 年离开 VideoGPT 这条时间分解，当时说得通，那时候要的是短片段，短片段上 \(q_{\mathrm{bi}}\) 就是对的模型。现在要测的变成了流式生成，先训双向短片，再做后训练，再在推理时搜 \(\mathcal{H}_i\)，到不了拟合 \(p(v_t\mid v_{&lt;t})\) 的目标，接下来只能在预训练改训练时能看见的变量。没改之前，现在叫「自回归视频」的做法仍是先按整段短片去噪，再在推理时改成只看过去。</p>
+<p>还有几个问题没有答案，最好在再调窗口之前先想清楚。已经双向的大规模视频骨干，只做时间因果的继续预训练，要多久才能去掉 \(q_{\mathrm{bi}}\) 留下的习惯，要不要重新初始化？连续隐空间上 \(K=1\) 稳不稳，还是需要更强的离散或混合码本？原生目标下，一帧跑一次网络和三帧跑一次网络，哪一个更能同时保住运动和延迟？学出来的 \(\mathcal{H}_i\) 要不要直接接收跨块一致性的信号？没有这条信号的窗口搜索，并不改变模型学到的条件。</p>
+<p>2021 年离开 VideoGPT「下一帧只看过去」这条路，当时说得通，那时候要的是短片段，短片段上 \(q_{\mathrm{bi}}\) 就是对的模型。现在要测的变成了流式生成，先训双向短片，再做后训练，再在推理时搜 \(\mathcal{H}_i\)，到不了拟合 \(p(v_t\mid v_{&lt;t})\) 的目标，接下来只能在预训练改训练时能看见的变量。没改之前，现在叫「自回归视频」的做法仍是先按整段短片去噪，再在推理时改成只看过去。</p>
 <h2 id="结论">结论</h2>
 <p>原生自回归是两件事，预训练拟合 \(p(v_t\mid v_{&lt;t},c_{\le t})\)，写出下一步网络只跑一次，现在通行的做法这两条都不成立。事后再补也补不上，块内损失只让同一块更好看，加长窗口或开关重置只改测试时看见谁，都到不了拟合 \(p(v_t\mid v_{&lt;t})\) 的目标。</p>
-<p>语言模型这几年走得快，是因为它一开始就按下一词来训，再把规模和数据堆上去。视频 2021 年离开了同一条分解，后来用因果 mask、少步积分和窗口搜索去模仿它。要跟上，就得在预训练改训练时能看见的变量，再加一级蒸馏补不上这两条，这件事还没做，我们离原生自回归视频模型还很远。</p>
+<p>语言模型这几年走得快，是因为它一开始就按下一词来训，再把规模和数据堆上去。视频 2021 年离开了「下一帧只看过去」这条路，后来用因果 mask、少步积分和窗口搜索去模仿它。要跟上，就得在预训练改训练时能看见的变量，再加一级蒸馏补不上这两条，这件事还没做，我们离原生自回归视频模型还很远。</p>
 <h2 id="references">参考文献</h2>
 <div class="refs"><ol><li id="ref-1">Zhang, S., Li, Y., Zhuang, J., Jin, W., et al. <em>EchoWM: Open and Enterable Omnimodal World Models.</em> arXiv:2608.23189, 2026. <a href="https://arxiv.org/abs/2608.23189">https://arxiv.org/abs/2608.23189</a></li>
 <li id="ref-2">Bengio, S., Vinyals, O., Jaitly, N., and Shazeer, N. <em>Scheduled Sampling for Sequence Prediction with Recurrent Neural Networks.</em> NeurIPS, 2015.</li>

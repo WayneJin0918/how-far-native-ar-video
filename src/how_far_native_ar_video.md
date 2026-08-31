@@ -145,7 +145,7 @@ Leaving VideoGPT’s temporal factorization in 2021 made sense. The goal then wa
 
 Native autoregression is two things. Pretraining fits \(p(v_t\mid v_{<t},c_{\le t})\). Writing the next step is one network evaluation. The stack now in use satisfies neither. Patching afterwards does not get there either. An intra-block loss only cleans the same block, and a longer window or a reset only changes who is visible at test time. Neither reaches the goal of fitting \(p(v_t\mid v_{<t})\).
 
-Language models have moved quickly because they trained next-token prediction from the start, then scaled. Video left the same factorization in 2021, and later imitated it with a causal mask, a short integral, and a search over the window. Catching up means changing, at pretraining, which variables training may see. Another distillation stage will not supply those two conditions. Until that change is made, we are still far from a native autoregressive video model.
+Language models have moved quickly because they trained next-token prediction from the start, then scaled. Video left next-frame-from-the-past in 2021, and later imitated it with a causal mask, a short integral, and a search over the window. Catching up means changing, at pretraining, which variables training may see. Another distillation stage will not supply those two conditions. Until that change is made, we are still far from a native autoregressive video model.
 
 ---
 
