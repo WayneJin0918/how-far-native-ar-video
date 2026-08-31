@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blog.css?v=29">
+  <link rel="stylesheet" href="css/blog.css?v=31">
 </head>
 <body>
   <div class="shell">
@@ -171,7 +171,7 @@ v_\theta(x_{\sigma,t},\sigma\mid v_{&lt;t},c_{\le t})
 <p>2021 年离开 VideoGPT「下一帧只看过去」这条路，当时说得通，因为要的是短片段，短片段上 \(q_{\mathrm{bi}}\) 就是对的模型。现在面对的已经是流式生成，先训双向短片，再做后训练，再在推理时搜 \(\mathcal{H}_i\)，到不了拟合 \(p(v_t\mid v_{&lt;t})\) 的目标，接下来只能在预训练改训练时能看见的变量。没改之前，现在叫「自回归视频」的做法仍是先按整段短片去噪，再在推理时改成只看过去。</p>
 <h2 id="结论">结论</h2>
 <p>原生自回归是两件事，预训练拟合 \(p(v_t\mid v_{&lt;t},c_{\le t})\)，写出下一步只需一次前向，现在通行的做法这两条都不成立。事后再补也补不上，块内损失只让同一块更好看，加长窗口或开关重置只改测试时能看见哪些帧，都到不了拟合 \(p(v_t\mid v_{&lt;t})\) 的目标。</p>
-<p>语言模型这几年走得快，是因为它一开始就按下一词来训，再把规模和数据堆上去。视频 2021 年离开了「下一帧只看过去」这条路，后来用因果 mask、少步积分和窗口搜索去模仿它。要跟上，就得在预训练改训练时能看见的变量，再加一级蒸馏补不上这两条，我们离原生自回归视频模型还很远。</p>
+<p>语言模型这几年走得快，是因为预训练从一开始就在做下一词预测，扩大模型和数据仍在优化同一个目标。视频生成在 2021 年为了短片画质离开了「下一帧只看过去」这条路，后来才加上因果 mask、少步去噪和窗口搜索，让双向短片模型能够流式生成，但这些都没有改变预训练拟合的条件。原生模型必须在预训练时看不见未来，生成下一步也只需一次前向，事后蒸馏补不上这两点。没做到这些，我们离原生自回归视频模型还很远。</p>
 <h2 id="references">参考文献</h2>
 <div class="refs"><ol><li id="ref-1">Zhang, S., Li, Y., Zhuang, J., Jin, W., et al. <em>EchoWM: Open and Enterable Omnimodal World Models.</em> arXiv:2608.23189, 2026. <a href="https://arxiv.org/abs/2608.23189">https://arxiv.org/abs/2608.23189</a></li>
 <li id="ref-2">Bengio, S., Vinyals, O., Jaitly, N., and Shazeer, N. <em>Scheduled Sampling for Sequence Prediction with Recurrent Neural Networks.</em> NeurIPS, 2015.</li>
@@ -206,7 +206,7 @@ v_\theta(x_{\sigma,t},\sigma\mid v_{&lt;t},c_{\le t})
         <button type="button" class="bib-copy" data-copy>复制</button>
         <pre><code>@misc{jin2026nativear,
   author       = {Jin, Weiyang},
-  title        = {How Far We Are From a Native Autoregressive Video Model},
+  title        = {How Far Are We from a Native Autoregressive Video Model?},
   year         = {2026},
   month        = aug,
   institution  = {The University of Hong Kong},

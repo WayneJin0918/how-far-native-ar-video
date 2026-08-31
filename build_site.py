@@ -14,7 +14,7 @@ PAGES = {
     "en": {
         "src": SRC / "how_far_native_ar_video.md",
         "out": ROOT / "index.html",
-        "title": "How Far We Are From a Native Autoregressive Video Model",
+        "title": "How Far Are We from a Native Autoregressive Video Model?",
         "lang": "en",
         "date": "31 August 2026",
     },
@@ -322,7 +322,7 @@ def page_html(cfg: dict, body: str) -> str:
     zh_on = "on" if cfg["lang"].startswith("zh") else ""
     bibtex = """@misc{jin2026nativear,
   author       = {Jin, Weiyang},
-  title        = {How Far We Are From a Native Autoregressive Video Model},
+  title        = {How Far Are We from a Native Autoregressive Video Model?},
   year         = {2026},
   month        = aug,
   institution  = {The University of Hong Kong},
@@ -356,7 +356,7 @@ def page_html(cfg: dict, body: str) -> str:
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blog.css?v=29">
+  <link rel="stylesheet" href="css/blog.css?v=31">
 </head>
 <body>
   <div class="shell">

@@ -1,4 +1,4 @@
-# How Far We Are From a Native Autoregressive Video Model
+# How Far Are We from a Native Autoregressive Video Model?
 
 Bilingual note. Pages:
 
