@@ -27,8 +27,8 @@ Do not write:
 - unexplained numbers, punchy metaphors (借口 / 戴上 mask / 赢的就是这一块 / 站在门口)
 - 本文 / this paper. This is a note. 这里 / in this note / we.
 - a conclusion that retells the whole essay. Restate the two conditions, that later patches do not reach them, and what has to change at pretraining. Do not make unpublished Flash runs the scope of “native.”
-- telegram closers: a colon after 说得通 / 仍然是 / 两件事 that dumps the rest of the argument; stacked punches like 「现在要测的是流。」「事后再补也到不了。」「块内损失让同一块更好看。」. If a sentence is only a label plus a formula, write the reason in the same breath.
-- broken 语序 / 断句: 「X 是两件事：A，B」should be two sentences. Put a pause before 「两条都不成立」. Do not stack four or more one-clause punches; join the patches to the claim they fail.
+- telegram closers: a colon after 说得通 / 仍然是 that dumps the rest of the argument; stacked punches like 「现在要测的是流。」「事后再补也到不了。」「块内损失让同一块更好看。」. If a sentence is only a label plus a formula, write the reason in the same breath.
+- broken Chinese continuity: related claims stay in one sentence, joined by commas / 而 / 所以. Do not copy English period-stacking. Split only when the thought turns. 「原生自回归是两件事，预训练拟合 p，写出下一步网络只跑一次」is one breath; 「是两件事。预训练拟合 p。写出下一步，网络只跑一次。」is not.
 
 TML is a **style** reference: calm we-voice, claim then why, one analogy at most. It is not a layout to copy (no hero, no sentence-tree cards).
 
