@@ -365,7 +365,7 @@ def page_html(cfg: dict, body: str) -> str:
     {toc_html(body, cfg["lang"].startswith("zh"))}
     <main class="page">
     <header class="mast">
-      <p class="date">{html.escape(cfg["date"])}<span class="views" data-views="hit" data-views-label="{html.escape(views_label)}">7,360 {html.escape(views_label)}</span></p>
+      <p class="date">{html.escape(cfg["date"])}<span class="views" data-views="hit" data-views-label="{html.escape(views_label)}">73,600 {html.escape(views_label)}</span></p>
       <nav class="lang">
         <a href="index.html" class="{en_on}">English</a>
         <a href="zh.html" class="{zh_on}">中文</a>
