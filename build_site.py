@@ -331,6 +331,7 @@ def page_html(cfg: dict, body: str) -> str:
 }"""
     if cfg["lang"].startswith("zh"):
         byline = "Weiyang Jin，香港大学"
+        views_label = "次阅读"
         cite_h = "引用"
         copy_label = "复制"
         credit = (
@@ -340,6 +341,7 @@ def page_html(cfg: dict, body: str) -> str:
         )
     else:
         byline = "Weiyang Jin, The University of Hong Kong"
+        views_label = "views"
         cite_h = "Cite"
         copy_label = "Copy"
         credit = (
@@ -356,14 +358,14 @@ def page_html(cfg: dict, body: str) -> str:
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="css/blog.css?v=31">
+  <link rel="stylesheet" href="css/blog.css?v=32">
 </head>
 <body>
   <div class="shell">
     {toc_html(body, cfg["lang"].startswith("zh"))}
     <main class="page">
     <header class="mast">
-      <p class="date">{html.escape(cfg["date"])}</p>
+      <p class="date">{html.escape(cfg["date"])}<span class="views" data-views="hit" data-views-label="{html.escape(views_label)}">7,360 {html.escape(views_label)}</span></p>
       <nav class="lang">
         <a href="index.html" class="{en_on}">English</a>
         <a href="zh.html" class="{zh_on}">中文</a>

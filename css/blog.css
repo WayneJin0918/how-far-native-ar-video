@@ -92,9 +92,18 @@ a:hover { color: var(--ink); }
 }
 
 .date {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
   margin: 0;
   color: var(--muted);
   font: 14px/1.4 "Source Sans 3", system-ui, sans-serif;
+}
+
+.views::before {
+  content: "·";
+  margin-right: 0.65rem;
 }
 
 .lang {

@@ -12,8 +12,32 @@
     setupStack();
     setupBib();
     setupToc();
+    setupViews();
   });
 })();
+
+function setupViews() {
+  var nodes = document.querySelectorAll("[data-views]");
+  if (!nodes.length) return;
+  var sessionKey = "native-ar-video-viewed";
+  var shouldHit = false;
+  nodes.forEach(function (el) {
+    if (el.getAttribute("data-views") === "hit") shouldHit = true;
+  });
+  var endpoint = shouldHit && !sessionStorage.getItem(sessionKey) ? "hit" : "get";
+  fetch("https://abacus.jasoncameron.dev/" + endpoint + "/waynejin0918/native-ar-video")
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      if (typeof data.value !== "number") return;
+      if (endpoint === "hit") sessionStorage.setItem(sessionKey, "1");
+      var text = String(data.value).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      nodes.forEach(function (el) {
+        var label = el.getAttribute("data-views-label");
+        el.textContent = label ? text + " " + label : text;
+      });
+    })
+    .catch(function () {});
+}
 
 function setupCites() {
   const tip = document.createElement("div");
