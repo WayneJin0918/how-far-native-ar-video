@@ -19,13 +19,13 @@
 function setupViews() {
   var nodes = document.querySelectorAll("[data-views]");
   if (!nodes.length) return;
-  var sessionKey = "native-ar-video-viewed";
+  var sessionKey = "native-ar-video-v2-viewed";
   var shouldHit = false;
   nodes.forEach(function (el) {
     if (el.getAttribute("data-views") === "hit") shouldHit = true;
   });
   var endpoint = shouldHit && !sessionStorage.getItem(sessionKey) ? "hit" : "get";
-  fetch("https://abacus.jasoncameron.dev/" + endpoint + "/waynejin0918/native-ar-video")
+  fetch("https://abacus.jasoncameron.dev/" + endpoint + "/waynejin0918/native-ar-video-v2")
     .then(function (res) { return res.json(); })
     .then(function (data) {
       if (typeof data.value !== "number") return;
