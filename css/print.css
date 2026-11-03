@@ -1,0 +1,175 @@
+@page {
+  size: A4;
+  margin: 11mm 14mm 13mm 14mm;
+}
+
+html,
+body {
+  background: #fff !important;
+  min-height: 0;
+}
+
+body.print {
+  margin: 0;
+  font-size: 10.55pt;
+  line-height: 1.62;
+  color: #2a241c;
+}
+
+html[lang="zh-Hans"] body.print {
+  font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
+  font-size: 10.45pt;
+  line-height: 1.68;
+}
+
+body.print .shell,
+body.print .page {
+  display: block;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+body.print .toc,
+body.print .lang,
+body.print .bib-copy,
+body.print .see-toggle {
+  display: none !important;
+}
+
+body.print .mast {
+  margin: 0 0 0.55em;
+}
+
+body.print h1 {
+  font-size: 1.38rem;
+  line-height: 1.25;
+  margin: 0 0 0.18em;
+}
+
+body.print .byline,
+body.print .date {
+  margin: 0 0 0.2em;
+  font-size: 10pt;
+}
+
+body.print h2 {
+  font-size: 1.05rem;
+  margin: 0.85em 0 0.28em;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+body.print article p {
+  text-align: justify;
+  text-align-last: start;
+  margin: 0 0 0.32em;
+  orphans: 2;
+  widows: 2;
+}
+
+html[lang="zh-Hans"] body.print article p {
+  text-justify: inter-character;
+  text-indent: 2em;
+  line-break: loose;
+  word-break: break-word;
+}
+
+html[lang="en"] body.print article p {
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+body.print article .byline,
+body.print article .see-note,
+body.print article .credit {
+  text-indent: 0;
+  text-align: start;
+}
+
+body.print .math-block {
+  margin: 0.38em 0 0.42em;
+}
+
+body.print .fig {
+  margin: 0.4em 0 0.48em;
+}
+
+body.print .print-see {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem 0.9rem;
+}
+
+body.print .print-see-row {
+  margin: 0;
+}
+
+body.print .print-see-row .lab-row {
+  margin: 0 0 0.18em;
+  font: 600 9.5pt/1.2 "Source Sans 3", "Noto Serif SC", sans-serif;
+}
+
+body.print .frame {
+  aspect-ratio: 1;
+}
+
+body.print .refs {
+  column-count: 2;
+  column-gap: 1.1rem;
+  font-size: 9.1pt;
+  line-height: 1.4;
+}
+
+body.print .refs ol {
+  margin: 0;
+}
+
+body.print .stack li {
+  cursor: default;
+  grid-template-columns: 4.6rem minmax(0, 1fr);
+  padding: 0.38rem 0.65rem;
+}
+
+body.print .stack .why {
+  display: block !important;
+}
+
+body.print .stack li.on {
+  background: #d5e0d8;
+}
+
+body.print .code-cols {
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+
+body.print .code-col pre {
+  font-size: 8.6pt;
+  line-height: 1.45;
+  padding: 0.55rem 0.65rem;
+  white-space: pre-wrap;
+}
+
+body.print .refs li {
+  margin: 0.14rem 0;
+  break-inside: avoid;
+}
+
+body.print .bib pre {
+  font-size: 8.4pt;
+  padding: 0.55rem 0.7rem;
+  white-space: pre-wrap;
+}
+
+body.print .credit {
+  margin: 0.9em 0 0;
+  padding-top: 0.45em;
+}
+
+body.print .see-note {
+  margin: 0.22em 0 0;
+  font-size: 8.9pt;
+}
